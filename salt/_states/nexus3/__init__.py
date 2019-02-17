@@ -258,17 +258,20 @@ def _connection_info():
     """
     defaults = {'host': 'http://127.0.0.1:8081',
                 'user': 'admin',
-                'pass': 'admin'}
+                'pass': 'admin123'}
 
     # return defaults
     connection_info = {}
     _opts = __salt__['config.option']('nexus3')
+    default_addrs_used = []
     for attr in defaults:
         if attr not in _opts:
-            log.debug('Using default value for Nexus3: {0}'.format(attr))
+            default_addrs_used.append(attr)
             connection_info[attr] = defaults[attr]
             continue
         connection_info[attr] = _opts[attr]
+    if default_addrs_used:
+        log.info('Using default value for Nexus3: {0}'.format(default_addrs_used))
     return connection_info
 
 
