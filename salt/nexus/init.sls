@@ -3,19 +3,19 @@
 nexus_user:
   group.present:
     - name: nexus
-    - gid: {{ nexus.user_id }}
+    - gid: {{ nexus['user_id'] }}
   user.present:
     - name: nexus
-    - uid: {{ nexus.user_id }}
-    - gid: {{ nexus.user_id }}
+    - uid: {{ nexus['user_id'] }}
+    - gid: {{ nexus['user_id'] }}
     - shell: /bin/bash
     - system: True
 
 nexus_data_dir:
   file.directory:
-    - name: {{ nexus.data_dir }}
-    - user: {{ nexus.user_id }}
-    - group: {{ nexus.user_id }}
+    - name: {{ nexus['data_dir'] }}
+    - user: {{ nexus['user_id'] }}
+    - group: {{ nexus['user_id'] }}
     - mode: 755
 
 nexus-image:
@@ -34,5 +34,5 @@ nexus:
       - "8081:8081"
       - "5000:5000" # using different port than nginx is binding to
     - binds:
-      - {{ nexus.data_dir }}:/nexus-data
+      - {{ nexus['data_dir'] }}:/nexus-data
     - restart_policy: always
