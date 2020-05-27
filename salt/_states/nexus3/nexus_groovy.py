@@ -167,13 +167,13 @@ if (existingRepository != null) {
 
 } else {
 
-    if (parsed_args.recipe_name == 'maven2-hosted') {s
+    if (parsed_args.recipe_name == 'maven2-hosted') {
         configuration = new Configuration(
                 repositoryName: parsed_args.name,
                 recipeName: parsed_args.recipe_name,
                 online: true,
                 attributes: [
-                        maven  : [
+                        maven: [
                                 versionPolicy: parsed_args.maven_version_policy.toUpperCase(),
                                 layoutPolicy : parsed_args.maven_layout_policy.toUpperCase()
                         ],
@@ -185,7 +185,6 @@ if (existingRepository != null) {
                 ]
         )
     } else if (parsed_args.recipe_name == 'docker-hosted') {
-
         configuration = new Configuration(
                 repositoryName: parsed_args.name,
                 recipeName: parsed_args.recipe_name,
