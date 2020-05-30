@@ -16,16 +16,17 @@ nexus_data_dir:
     - name: {{ nexus['data_dir'] }}
     - user: {{ nexus['user_id'] }}
     - group: {{ nexus['user_id'] }}
+    - makedirs: True
     - mode: 755
 
 nexus-image:
   docker_image.present:
     - force: True  # Ensures a new image is always pulled if the current one is out of date
-    - name: sonatype/nexus3:latest
+    - name: sonatype/nexus3:3.18.0
 nexus:
   docker_container.running:
     - name: nexus
-    - image: "sonatype/nexus3:latest"
+    - image: "sonatype/nexus3:3.18.0"
     - log_driver: json-file
     - log_opt:
       - max-size: "10m"

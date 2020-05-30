@@ -166,6 +166,7 @@ class _ScriptClient:
         delete_url = '{0}/{1}'.format(self.url, self.script_name)
         resp = False
         if self.get():
+            log.debug('Deleting script: {0}'.format(self.script_name).format(self.script_name))
             req = requests.delete(delete_url, auth=(self.username, self.password))
             if req.status_code == 204 or 200:
                 resp = req.content
@@ -182,6 +183,7 @@ class _ScriptClient:
         get_url = '{0}/{1}'.format(self.url, self.script_name)
         resp = False
         try:
+            log.debug('Checking for script: {0}'.format(self.script_name))
             req = requests.get(get_url, auth=(self.username, self.password))
             if req.status_code == 204 or 200:
                 resp = req.content
@@ -212,11 +214,12 @@ class _ScriptClient:
 
         resp = False
         if self.get():
+            log.debug('Running script: {0}'.format(self.script_name))
             req = requests.post(run_url, auth=(self.username, self.password), headers=headers, data=payload)
             if req.status_code == 204 or 200:
                 resp = req.json()
                 return resp
-            log.error('Failed running script: {0}" Reason: {1}'.format(self.script_name, req.status_code))
+            log.error('Failed running script: {0}" Reason: {1} {2}'.format(self.script_name, req.status_code, req.json()))
 
         return resp
 
@@ -236,13 +239,15 @@ class _ScriptClient:
         headers = {'Content-Type': 'application/json'}
         resp = False
         if self.get():
+            log.debug('Updating script: {0}'.format(self.script_name))
             upload_url = '{0}/{1}'.format(self.url, self.script_name)
             req = requests.put(upload_url, auth=(self.username, self.password), headers=headers, data=payload)
             if req.status_code == 204 or 200:
                 resp = True
                 return resp
-            log.error('Failed updating script "{0}." Reason: {1}'.format(self.script_name, req.status_code))
+            log.error('Failed updating script: {0} Reason: {1}'.format(self.script_name, req.status_code))
         else:
+            log.debug('Uploading script: {0}'.format(self.script_name))
             req = requests.post(self.url, auth=(self.username, self.password), headers=headers, data=payload)
             if req.status_code == 204 or 200:
                 resp = True

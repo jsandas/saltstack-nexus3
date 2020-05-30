@@ -1,0 +1,6 @@
+.vagrant
+files/grains
+files/minion
+data/salt/*
+data/pillar/*
+*.log

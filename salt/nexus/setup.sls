@@ -1,14 +1,14 @@
-{% from "nexus/maps.jinja" import nexus with context %}
+{% from "nexus/map.jinja" import nexus with context %}
 
-{% for role, data in nexus.roles.items() %}
+{% for role, data in nexus['roles'].items() %}
 {{ role }}:
   nexus3.role:
     - description: '{{ data.description }}'
     - privileges:
       - nx-repository-view-*-*-read
-    - roles: 
-      - nx-anonymous
-{% endfor %}}
+    - base_roles: 
+      - {{ data.base_roles }}
+{% endfor %}
 
 test_user:
   nexus3.user:
@@ -17,12 +17,12 @@ test_user:
     - last_name: bob
     - email: test@nowhere.com
     - password: 'testing123'
-    - roles:
+    - base_roles:
       - repo-user
 
-change_anonymous_access:
+enable_anonymous_access:
   nexus3.allow_anonymous_access:
-    - option: True
+    - enable: True
 
 http://localhost:8081:
   nexus3.base_url
