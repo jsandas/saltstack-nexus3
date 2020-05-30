@@ -1,5 +1,7 @@
 {% from "nexus/map.jinja" import nexus with context %}
 
+# create nexus user on host that
+# matches the user in the docker container
 nexus_user:
   group.present:
     - name: nexus
@@ -11,6 +13,7 @@ nexus_user:
     - shell: /bin/bash
     - system: True
 
+# create folder on host to persist data
 nexus_data_dir:
   file.directory:
     - name: {{ nexus['data_dir'] }}
@@ -19,21 +22,21 @@ nexus_data_dir:
     - makedirs: True
     - mode: 755
 
-nexus-image:
-  docker_image.present:
-    - force: True  # Ensures a new image is always pulled if the current one is out of date
-    - name: sonatype/nexus3:3.18.0
+# always pull new image
 nexus:
+  docker_image.present:
+    - force: True
+    - name: sonatype/nexus3
   docker_container.running:
     - name: nexus
-    - image: "sonatype/nexus3:3.18.0"
+    - image: "sonatype/nexus3"
     - log_driver: json-file
     - log_opt:
       - max-size: "10m"
       - max-file: "3"
     - port_bindings:
       - "8081:8081"
-      - "5000:5000" # using different port than nginx is binding to
+      - "5000:5000"
     - binds:
       - {{ nexus['data_dir'] }}:/nexus-data
     - restart_policy: always
