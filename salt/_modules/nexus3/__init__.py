@@ -17,7 +17,6 @@ import logging
 
 import utils
 
-# logging.basicConfig()
 log = logging.getLogger(__name__)
 
 # Define the module's virtual name and alias
@@ -51,32 +50,42 @@ def create_blobstore(name,
     '''
     Create blobstore
 
-    .. note::
-        The blobstore name is used for blobstore path.  
+    name (str):
+        Name of blobstore
+        .. note::
+            The blobstore name is used for blobstore path.  
 
-    Args:
-        name (str):
-            Name of blobstore
-        quota_type (str):
-            Optional: Quota type
-            Options: spaceRemainingQuota or spaceUsedQuota
-            Default: None
-        quota_limit (int):
-            Optional: Quota size in bytes
-            Default: 0
-        store_type (str):
-            Optional: Type of blobstore
-            Options: file or s3
-            Default: file
-        s3_bucket (str):
-            Optional: Name of S3 bucket
-        s3_access_key_id (str):
-            Optional: AWS Access Key for S3 bucket
-        s3_secret_access_key (str):
-            Optional: AWS Secret Access Key for S3 bucket
+    quota_type (str):
+        Optional: Quota type
+        Options: spaceRemainingQuota or spaceUsedQuota
+        Default: None
 
-    CLI Example:
+    quota_limit (int):
+        Optional: Quota size in bytes
+        Default: 0
 
+    store_type (str):
+        Optional: Type of blobstore
+        Options: file or s3
+        Default: file
+        .. note::
+            S3 blobstores are currently untested.
+
+    s3_bucket (str):
+        Optional: Name of S3 bucket
+        .. note::
+            S3 blobstores are currently untested.
+
+    s3_access_key_id (str):
+        Optional: AWS Access Key for S3 bucket
+        .. note::
+            S3 blobstores are currently untested.
+
+    s3_secret_access_key (str):
+        Optional: AWS Secret Access Key for S3 bucket
+        .. note::
+            The blobstore name is used for blobstore path.
+            
     .. code-block:: bash
 
         salt myminion nexus3.create_blobstore name=myblobstore
@@ -120,11 +129,8 @@ def delete_blobstore(name):
     '''
     deletes specified blobstore
 
-    Args:
-        name (str):
-            Name of blobstore
-
-    CLI Example:
+    name (str):
+        Name of blobstore
 
     .. code-block:: bash
 
@@ -156,11 +162,8 @@ def describe_blobstore(name):
     '''
     returns metadata of specified blobstore
 
-    Args:
-        name (str):
-            Name of blobstore
-
-    CLI Example:
+    name (str):
+        Name of blobstore
 
     .. code-block:: bash
 
@@ -191,8 +194,6 @@ def list_blobstores():
     '''
     Lists all blobstores
 
-    CLI Example:
-
     .. code-block:: bash
 
         salt myminion nexus3.list_blobstores
@@ -219,21 +220,19 @@ def update_blobstore(name,
     '''
     Create blobstore
 
-    .. note::
-        The blobstore name is used for blobstore path.
+    name (str):
+        Name of blobstore
+        .. note::
+            The blobstore name is used for blobstore path.
 
-    Args:
-        name (str):
-            Name of blobstore
-        quota_type (str):
-            Optional: Quota type
-            Options: spaceRemainingQuota or spaceUsedQuota
-            Default: None
-        quota_limit (int):
-            Optional: Quota size in bytes
-            Default: 0
+    quota_type (str):
+        Optional: Quota type
+        Options: spaceRemainingQuota or spaceUsedQuota
+        Default: None
 
-    CLI Example:
+    quota_limit (int):
+        Optional: Quota size in bytes
+        Default: 0
 
     .. code-block:: bash
 

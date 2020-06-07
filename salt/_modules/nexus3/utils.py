@@ -9,7 +9,6 @@ import logging
 
 import requests
 
-# logging.basicConfig()
 log = logging.getLogger(__name__)
 
 base_api_path = 'service/rest'
