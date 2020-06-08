@@ -42,7 +42,7 @@ blobstore_v1_path = 'v1/blobstores'
 
 def create_blobstore(name,
            quota_type=None,
-           quota_limit=0,
+           quota_limit=1000000,
            store_type='file',
            s3_bucket='',
            s3_access_key_id='',
@@ -61,8 +61,11 @@ def create_blobstore(name,
         Default: None
 
     quota_limit (int):
-        Optional: Quota size in bytes
-        Default: 0
+        Optional: Quota limit in bytes 
+        Default: 1000000
+        .. note::
+            The limit should be no less than 1000000 bytes (1 MB) otherwise
+            it does not display properly in the UI.
 
     store_type (str):
         Optional: Type of blobstore
@@ -93,14 +96,14 @@ def create_blobstore(name,
     '''
 
     ret = {
-        'comment': 'Created blobstore "{}"'.format(name)
+        'blobstore': {}
     }
 
     path = '{}/{}'.format(blobstore_beta_path, store_type)
 
     payload = {
         'name': name,
-        'path': name,
+        'path': '/nexus-data/blobs/' + name,
     }
 
     if quota_type is not None:
@@ -111,16 +114,20 @@ def create_blobstore(name,
 
     nc = utils.NexusClient()
 
-    exists = nc.get(path + '/' + name)
+    resp = nc.get(path + '/' + name)
 
-    if exists:
+    if resp['status'] == 200:
         ret['comment'] = 'Blobstore "{}" already exists.'.format(name)
         return ret
 
     resp = nc.post(path, payload)
 
-    if not resp:
-        ret['comment'] = 'Failed to create blobstore "{}".  See minion logs for details.'.format(name)
+    if resp['status'] == 204:
+        ret['blobstore'] = describe_blobstore(name)['blobstore']
+    else:
+        ret['comment'] = 'Failed to create blobstore "{}".'.format(name)
+        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+
 
     return ret
 
@@ -145,15 +152,22 @@ def delete_blobstore(name):
 
     nc = utils.NexusClient()
 
-    metadata = describe_blobstore(name)
+    # metadata = describe_blobstore(name)
 
-    if not metadata['blobstore']:
-        ret['comment'] = 'Blobstore "{}" does not exist.'.format(name)
-        return ret
+    # if metadata['error'] is None:
+    #     ret['comment'] = 'Failed to delete blobstore "{}".'.format(name)
+    #     ret['error'] = '{}'.format(metadata['error'])
+    #     return metadata
+
+    # if not metadata['blobstore']:
+    #     ret['comment'] = 'Blobstore "{}" does not exist.'.format(name)
+    #     return ret
 
     resp = nc.delete(path)
-    if not resp:
-        ret['comment'] = 'Failed to delete blobstore "{}".  See minion logs for details.'.format(name)
+
+    if resp['status'] != 204:
+        ret['comment'] = 'Failed to delete blobstore "{}".'.format(name)
+        ret['error'] = '{} : {}'.format(resp['status'], resp['body'])
 
     return ret
 
@@ -171,21 +185,22 @@ def describe_blobstore(name):
     '''
 
     ret = {
-        'blobstore': {}
+        'blobstore': {},
     }
 
     nc = utils.NexusClient()
     resp = nc.get(blobstore_beta_path)
 
-    if not resp:
-        ret['comment'] = 'Failed retrieving blobstore {}.  See minion logs for details.'.format(name)
+    if resp['status'] == 200:
+        bstore_list = json.loads(resp['body'])
 
-    bstore_list = json.loads(resp.content)
-
-    for bstore in bstore_list:
-        if bstore['name'] == name:
-            ret['blobstore'] = bstore
-            break
+        for bstore in bstore_list:
+            if bstore['name'] == name:
+                ret['blobstore'] = bstore
+                break
+    else:
+        ret['comment'] = 'Failed to retrieve blobstore "{}".'.format(name)
+        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
 
     return ret
 
@@ -206,17 +221,18 @@ def list_blobstores():
     nc = utils.NexusClient()
     resp = nc.get(blobstore_beta_path)
 
-    if not resp:
-        ret['comment'] = 'Faled retrieving blobstores.  See minion logs for details.'
-
-    ret['blobstore'] = json.loads(resp.content)
+    if resp['status'] == 200:
+        ret['blobstore'] = json.loads(resp['body'])
+    else:
+        ret['comment'] = 'Failed to retrieve blobstores "{}".'
+        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
 
     return ret
 
 
 def update_blobstore(name,
            quota_type=None,
-           quota_limit=0):
+           quota_limit=1000000):
     '''
     Create blobstore
 
@@ -231,30 +247,34 @@ def update_blobstore(name,
         Default: None
 
     quota_limit (int):
-        Optional: Quota size in bytes
-        Default: 0
+        Optional: Quota limit in bytes 
+        Default: 1000000
+        .. note::
+            The limit should be no less than 1000000 bytes (1 MB) otherwise
+            it does not display properly in the UI.
 
     .. code-block:: bash
 
         salt myminion nexus3.create_blobstore name=myblobstore quota_type=spaceRemainingQuota quota_limit=5000000
     '''
 
-    ret = {}
+    ret = {
+        'blobstore': {}
+    }
 
     payload = {
-        'path': name,
+        'path': '/nexus-data/blobs/' + name,
         'softQuota': {
             'type': quota_type,
             'limit': quota_limit
         }
     }
 
-    print(payload)
     metadata = describe_blobstore(name)
 
     if not metadata['blobstore']:
-        ret['comment'] = 'Blobstore "{}" does not exist.'.format(name)
-        return ret
+        # ret['comment'] = 'Blobstore "{}" does not exist.'.format(name)
+        return metadata
 
     path = '{}/{}/{}'.format(blobstore_beta_path, metadata['blobstore']['type'].lower(), name)
 
@@ -262,11 +282,12 @@ def update_blobstore(name,
 
     resp = nc.put(path, payload)
 
-    if not resp:
-        ret['comment'] = 'Failed to updating blobstore "{}".  See minion logs for details.'.format(name)
-
-    ret = describe_blobstore(name)
+    if resp['status'] == 204:
+        ret['blobstore'] = describe_blobstore(name)['blobstore']
+    else:
+        ret['comment'] = 'Failed to update blobstore "{}".'.format(name)
+        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
 
     return ret
 
-# print(update_blobstore("testing", "spaceRemainingQuota", 4000000))
+# print(create_blobstore("testing", "spaceRemainingQuta", 4000000))

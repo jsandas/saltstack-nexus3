@@ -54,42 +54,66 @@ class NexusClient:
         delete object from nexus server
         '''
         delete_path = '{}/{}'.format(self.base_url, path)
-        resp = False
+
+        ret = {
+            'status': -1,
+            'body': {}
+        }
+
         try:
             resp = requests.delete(delete_path, auth=(self.username, self.password))
             log.debug('NexusClient Request: {} {}'.format(delete_path, resp.status_code))
+            ret['status'] = resp.status_code
+            ret['body'] = resp.content
         except Exception as e:
             log.error('NexusClient Request failed: {}'.format(e))
+            ret['body'] = e
 
-        return resp
+        return ret
 
     def get(self, path):
         '''
         get data from nexus server
         '''
         get_path = '{}/{}'.format(self.base_url, path)
-        resp = False
+
+        ret = {
+            'status': -1,
+            'body': {}
+        }
+
         try:
             resp = requests.get(get_path, auth=(self.username, self.password))
             log.debug('NexusClient Request: {} {}'.format(get_path, resp.status_code))
+            ret['status'] = resp.status_code
+            ret['body'] = resp.content
         except Exception as e:
             log.error('NexusClient Request failed: {}'.format(e))
+            ret['body'] = e
 
-        return resp
+        return ret
 
     def post(self, path, payload):
         '''
         post payload to Nexus server
         '''
         post_path = '{}/{}'.format(self.base_url, path)
-        resp = False
+        
+        ret = {
+            'status': -1,
+            'body': {}
+        }
+
         try:
             resp = requests.post(post_path, auth=(self.username, self.password), json=payload)
             log.debug('NexusClient Request: {} {}'.format(post_path, resp.status_code))
+            ret['status'] = resp.status_code
+            ret['body'] = resp.content
         except Exception as e:
             log.error('NexusClient Request failed: {}'.format(e))
+            ret['body'] = e
 
-        return resp
+        return ret
 
     def put(self, path, payload):
         '''
@@ -97,12 +121,18 @@ class NexusClient:
         '''
         put_path = '{}/{}'.format(self.base_url, path)
 
-        print(put_path)
-        resp = False
+        ret = {
+            'status': -1,
+            'body': {}
+        }
+
         try:
             resp = requests.put(put_path, auth=(self.username, self.password), json=payload)
             log.debug('NexusClient Request: {} {}'.format(put_path, resp.status_code))
+            ret['status'] = resp.status_code
+            ret['body'] = resp.content
         except Exception as e:
             log.error('NexusClient Request failed: {}'.format(e))
+            ret['body'] = e
 
-        return resp
+        return ret
