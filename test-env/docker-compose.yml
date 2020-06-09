@@ -11,3 +11,4 @@ services:
       - $PWD/../salt:/srv/salt
       - $PWD/../pillar:/srv/pillar
       - $PWD/files/master.conf:/etc/salt/master.d/master.conf
+      - $PWD/../tests/:/tests/
