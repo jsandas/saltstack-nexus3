@@ -1,4 +1,4 @@
-{% from "nexus/map.jinja" import nexus with context %}
+{% from tpldir + "/map.jinja" import nexus with context %}
 
 # create nexus user on host that
 # matches the user in the docker container
@@ -26,10 +26,10 @@ nexus_data_dir:
 nexus:
   docker_image.present:
     - force: True
-    - name: sonatype/nexus3
+    - name: sonatype/nexus3:latest
   docker_container.running:
     - name: nexus
-    - image: "sonatype/nexus3"
+    - image: sonatype/nexus3:latest
     - log_driver: json-file
     - log_opt:
       - max-size: "10m"
