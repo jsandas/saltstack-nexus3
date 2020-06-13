@@ -41,12 +41,12 @@ blobstore_beta_path = 'beta/blobstores'
 blobstore_v1_path = 'v1/blobstores'
 
 def create_blobstore(name,
-           quota_type=None,
-           quota_limit=1000000,
-           store_type='file',
-           s3_bucket='',
-           s3_access_key_id='',
-           s3_secret_access_key=''):
+                quota_type=None,
+                quota_limit=1000000,
+                store_type='file',
+                s3_bucket='',
+                s3_access_key_id='',
+                s3_secret_access_key=''):
     '''
     Create blobstore
 
@@ -96,7 +96,7 @@ def create_blobstore(name,
     '''
 
     ret = {
-        'blobstore': {}
+        'blobstore': {},
     }
 
     path = '{}/{}'.format(blobstore_beta_path, store_type)
@@ -231,8 +231,8 @@ def list_blobstores():
 
 
 def update_blobstore(name,
-           quota_type=None,
-           quota_limit=1000000):
+                quota_type=None,
+                quota_limit=1000000):
     '''
     Create blobstore
 
@@ -264,16 +264,17 @@ def update_blobstore(name,
 
     payload = {
         'path': '/nexus-data/blobs/' + name,
-        'softQuota': {
+    }
+
+    if quota_type is not None:
+        payload['softQuota'] = {
             'type': quota_type,
             'limit': quota_limit
         }
-    }
 
     metadata = describe_blobstore(name)
 
     if not metadata['blobstore']:
-        # ret['comment'] = 'Blobstore "{}" does not exist.'.format(name)
         return metadata
 
     path = '{}/{}/{}'.format(blobstore_beta_path, metadata['blobstore']['type'].lower(), name)
