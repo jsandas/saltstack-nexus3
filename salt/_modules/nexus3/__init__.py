@@ -48,8 +48,6 @@ def create_blobstore(name,
                 s3_access_key_id='',
                 s3_secret_access_key=''):
     '''
-    Create blobstore
-
     name (str):
         Name of blobstore
         .. note::
@@ -134,8 +132,6 @@ def create_blobstore(name,
 
 def delete_blobstore(name):
     '''
-    deletes specified blobstore
-
     name (str):
         Name of blobstore
 
@@ -174,8 +170,6 @@ def delete_blobstore(name):
 
 def describe_blobstore(name):
     '''
-    returns metadata of specified blobstore
-
     name (str):
         Name of blobstore
 
@@ -207,8 +201,6 @@ def describe_blobstore(name):
 
 def list_blobstores():
     '''
-    Lists all blobstores
-
     .. code-block:: bash
 
         salt myminion nexus3.list_blobstores
@@ -234,7 +226,7 @@ def update_blobstore(name,
                 quota_type=None,
                 quota_limit=1000000):
     '''
-    Create blobstore
+    Only blobstore quotas can be updated
 
     name (str):
         Name of blobstore

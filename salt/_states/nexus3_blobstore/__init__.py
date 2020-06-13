@@ -20,8 +20,6 @@ log = logging.getLogger(__name__)
 
 def absent(name):
     '''
-    delete blobstore
-
     Args:
         name (str):
             Name of blobstore
@@ -83,8 +81,6 @@ def present(name,
         s3_access_key_id='',
         s3_secret_access_key=''):
     '''
-    Create or modify blobstore
-
     Args:
         name (str):
             Name of blobstore

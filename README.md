@@ -1,17 +1,16 @@
-State files for setting up Nexus 3 using docker and State module for working with the Nexus 3 API to configure Nexus.  This is a work in progress.
+The purpose of this project is to create a (hopefully) easy to use method for managing Nexus 3 using Salt.  This is a major refactor which leverages the REST api rather than the script api.  Sonatype has disabled execution of groovy scripts by default for security reasons.
+
+This version is incomplete and not ready for usage yet.
 
 Installation:
-Copy the _states folder the the files_root on the saltmaster (usually '/srv/salt').  Then run saltutil.sync_states or saltutil.sync_all to copy the files to the minion.
+Copy the _states, _modules folder the the files_root on the saltmaster (usually '/srv/salt').  Then run saltutil.sync_all to copy the files to the minion.
 
     Example:
-        salt '*' saltutil.sync_states
+        salt '*' saltutil.sync_all
 
-The files in the nexus folder as well as the pillar data can be used as examples for using this state module.
+The files in the nexus3 folder as well as the pillar data can be used as examples for using these modules.
 
-These example files will create the local user and directory for Nexus and download/start the docker container.  Feel free to adapt to your needs.  It is recommended to use a reverse proxy in front of Nexus for SSL termination.
-
-This state module leverages the ThoTeam's work for Ansible: https://github.com/ansible-ThoTeam/nexus3-oss.
-The groovy scripts used by this state are copied to or adapted for using with salt and provided in a python file as strings to keep things simple for maintaining the salt state..
+These example files will create the local user and directory for Nexus and download/start the docker container.  Feel free to adapt to your needs.  It is recommended to use a reverse proxy in front of Nexus for SSL termination in production.
 
 The nexus3 state module depends on python requests library which should already be installed when the salt minion was installed.
 
@@ -23,10 +22,10 @@ In order to connect to Nexus 3, credentials can be provided through the minion c
       user: 'admin'
       pass: 'admin123'
 
-If no credentials are provided in the minion configuration file, the defaults for Nexus 3 are used instead.
+If no credentials are provided in the minion configuration file, the defaults for Nexus 3 are used instead. (Update) Nexus 3 now autogenerates the admin password on new installations.
 
 TODO:
-Update README with more descriptions and examples of other functions
+Everything below is outdated and must be updated
 
 
   salt.states.nexus3.**allow_anonymous_access**(name,enable=False):
