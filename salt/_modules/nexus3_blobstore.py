@@ -1,5 +1,5 @@
 ''''
-execution module for the Nexus 3 API
+execution module for Nexus 3 blobstores
 
 :configuration: In order to connect to Nexus 3, certain configuration is required
     in /etc/salt/minion on the relevant minions otherwise defaults are used. A sample dictionary might look
@@ -162,8 +162,7 @@ def describe(name):
         'blobstore': {},
     }
 
-    resp = __salt__['nexus3_blobstore.list_all']()
-    log.warn('list: {}'.format(resp))
+    resp = list_all()
 
     if 'error' in resp.keys():
         ret['result'] = False
@@ -172,7 +171,6 @@ def describe(name):
         return ret        
 
     for bstore in resp['blobstores']:
-        log.warn('item: {}'.format(bstore))
         if bstore['name'] == name:
             ret['blobstore'] = bstore
             break

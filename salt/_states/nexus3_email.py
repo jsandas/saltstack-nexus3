@@ -1,5 +1,5 @@
 ''''
-stage module for Nexus 3 blobstore
+stage module for Nexus 3 email settings
 
 :configuration: In order to connect to Nexus 3, certain configuration is required
     in /etc/salt/minion on the relevant minions otherwise defaults are used. A sample dictionary might look
