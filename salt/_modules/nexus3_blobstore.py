@@ -15,12 +15,9 @@ execution module for the Nexus 3 API
 import json
 import logging
 
-import utils
+import nexus3
 
 log = logging.getLogger(__name__)
-
-# Define the module's virtual name and alias
-__virtualname__ = "nexus3"
 
 __outputter__ = {
     "sls": "highstate",
@@ -28,18 +25,9 @@ __outputter__ = {
     "highstate": "highstate",
 }
 
-
-def __virtual__():
-    '''
-    Use virtualname
-    '''
-    return True
-
-
-#### blobstore ####
 blobstore_beta_path = 'beta/blobstores'
 blobstore_v1_path = 'v1/blobstores'
-email_path = 'beta/email'
+
 
 def create_blobstore(name,
                 quota_type=None,
@@ -85,8 +73,8 @@ def create_blobstore(name,
             
     .. code-block:: bash
 
-        salt myminion nexus3.create_blobstore name=myblobstore
-        salt myminion nexus3.create_blobstore name=myblobstore quota_type=spaceRemainingQuota spaceRemainingQuota=5000000
+        salt myminion nexus3_blobstore.create_blobstore name=myblobstore
+        salt myminion nexus3_blobstore.create_blobstore name=myblobstore quota_type=spaceRemainingQuota spaceRemainingQuota=5000000
     '''
 
     ret = {
@@ -106,7 +94,7 @@ def create_blobstore(name,
             'size': quota_limit
         }
 
-    nc = utils.NexusClient()
+    nc = nexus3.NexusClient()
 
     resp = nc.get(path + '/' + name)
 
@@ -133,7 +121,7 @@ def delete_blobstore(name):
 
     .. code-block:: bash
 
-        salt myminion nexus3.delete_blobstore name=myblobstore
+        salt myminion nexus3_blobstore.delete_blobstore name=myblobstore
     '''
 
     ret = {
@@ -142,7 +130,7 @@ def delete_blobstore(name):
 
     path = '{}/{}'.format(blobstore_beta_path, name)
 
-    nc = utils.NexusClient()
+    nc = nexus3.NexusClient()
 
     metadata = describe_blobstore(name)
 
@@ -166,14 +154,14 @@ def describe_blobstore(name):
 
     .. code-block:: bash
 
-        salt myminion nexus3.describe_blobstore name=myblobstore
+        salt myminion nexus3_blobstore.describe_blobstore name=myblobstore
     '''
 
     ret = {
         'blobstore': {},
     }
 
-    nc = utils.NexusClient()
+    nc = nexus3.NexusClient()
     resp = nc.get(blobstore_beta_path)
 
     if resp['status'] == 200:
@@ -194,14 +182,14 @@ def list_blobstores():
     '''
     .. code-block:: bash
 
-        salt myminion nexus3.list_blobstores
+        salt myminion nexus3_blobstore.list_blobstores
     '''
 
     ret = {
         'blobstore': {}
     }
 
-    nc = utils.NexusClient()
+    nc = nexus3.NexusClient()
     resp = nc.get(blobstore_beta_path)
 
     if resp['status'] == 200:
@@ -236,7 +224,7 @@ def update_blobstore(name,
 
     .. code-block:: bash
 
-        salt myminion nexus3.create_blobstore name=myblobstore quota_type=spaceRemainingQuota quota_limit=5000000
+        salt myminion nexus3_blobstore.create_blobstore name=myblobstore quota_type=spaceRemainingQuota quota_limit=5000000
     '''
 
     ret = {
@@ -260,7 +248,7 @@ def update_blobstore(name,
 
     path = '{}/{}/{}'.format(blobstore_beta_path, metadata['blobstore']['type'].lower(), name)
 
-    nc = utils.NexusClient()
+    nc = nexus3.NexusClient()
 
     resp = nc.put(path, payload)
 
@@ -271,175 +259,3 @@ def update_blobstore(name,
         ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
 
     return ret
-
-
-#### email ####
-def configure_email(enabled,
-                    host='localhost',
-                    port=25,
-                    use_truststore=False,
-                    username='',
-                    password='',
-                    email_from='nexus@example.org',
-                    subject_prefix='',
-                    starttls_enabled=False,
-                    starttls_required=False,
-                    tls_connect=False,
-                    tls_verify=False):
-    '''
-    enabled (bool):
-        enable email support [True|False]
-
-    host (string):
-        smtp hostname (Default: localhost)
-
-    port (int):
-        smtp port (Default: 25)
-
-    use_truststore (bool):
-        use nexus truststore [True|False] (Default: False)
-        .. note::
-            Ensure CA certificate is add to the Nexus trustore
-
-    username (str):
-        smtp username (Default: '')
-
-    password (str):
-        smtp password (Default: '')
-
-    email_from (str):
-        mail from address (Default: nexus@example.org)
-
-    subject_prefix (str):
-        prefix for subject in emails (Default: '')
-
-    starttls_enabled (bool):
-        enable starttls (Default: False)
-        .. note::
-            tls_connect and starttls should be mutually exclusive
-
-    starttls_required (bool):
-        require starttls (Default: False)
-        .. note::
-            tls_connect and starttls should be mutually exclusive
-
-    tls_connect (bool):
-        connect using tls (SMTPS) (Default: False)
-        .. note::
-            tls_connect and starttls should be mutually exclusive
-
-    tls_verify (bool):
-        verify server certificate (Default: False)
-
-    .. code-block:: bash
-
-        salt myminion nexus3.configure_email enabled=True host=smtp.example.com
-
-        salt myminion nexus3.configure_email enabled=False
-    '''
-
-    ret = {
-        'email': {}
-    }
-
-    payload = {
-        "enabled": enabled,
-        "host": host,
-        "port": port,
-        "username": username,
-        "password": password,
-        "fromAddress": email_from,
-        "subjectPrefix": subject_prefix,
-        "startTlsEnabled": starttls_enabled,
-        "startTlsRequired": starttls_required,
-        "sslOnConnectEnabled": tls_connect,
-        "sslServerIdentityCheckEnabled": tls_verify,
-        "nexusTrustStoreEnabled": use_truststore
-        }
-
-    nc = utils.NexusClient()
-    resp = nc.put(email_path, payload)
-
-    if resp['status'] != 204:
-        ret['comment'] = 'Failed to retrieve emails settings.'
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
-        return ret
-    
-    email_config = get_email()
-    ret['email'] = email_config['email']
-
-    return ret
-
-
-def get_email():
-    '''
-    .. code-block:: bash
-
-        salt myminion nexus3.get_email
-    '''
-
-    ret = {
-        'email': {}
-    }
-
-    nc = utils.NexusClient()
-    resp = nc.get(email_path)
-
-    if resp['status'] == 200:
-        ret['email'] = json.loads(resp['body'])
-    else:
-        ret['comment'] = 'Failed to retrieve email settings'
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
-
-    return ret
-
-
-def reset_email():
-    '''
-    .. code-block:: bash
-
-        salt myminion nexus3.reset_email
-    '''
-
-    ret = {}
-
-    nc = utils.NexusClient()
-    resp = nc.delete(email_path)
-
-    if resp['status'] == 204:
-        ret['comment'] = 'Email settings reset'
-    else:
-        ret['comment'] = 'Failed to reset email settings'
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
-
-    return ret
-
-
-def verify_email(to):
-    '''
-    to (str):
-        address to send test email to
-    
-    .. code-block:: bash
-
-        salt myminion nexus3.verify_email
-    '''
-    ret = {}
-
-    verify_path = email_path + '/verify'
-
-    nc = utils.NexusClient()
-    resp = nc.post_str(verify_path, to)
-
-    if resp['status'] == 200:
-        status = json.loads(resp['body'])
-        if status['success']:
-            ret['comment'] = 'Success sending email to {}.'.format(to)
-        else:
-            ret['comment'] = 'Failed to send email.'
-            ret['error'] = status['reason']
-    else:
-        ret['comment'] = 'Failed to send email.'
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
-
-    return ret   

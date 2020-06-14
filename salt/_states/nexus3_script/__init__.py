@@ -2,6 +2,11 @@
 """"
 State module for working with the Nexus 3 API
 
+.. note::
+    Sonatype has disable groovy script execution by default in recent versions
+    of Nexus 3.  See here for defaults. 
+    https://help.sonatype.com/repomanager3/rest-and-integration-api/script-api
+    
 Based on the work in ThoTeam's project for ansible (https://github.com/ansible-ThoTeam/nexus3-oss).
 The groovy scripts used by this state are copied from or based on the scripts
 provided in this repository in the nexus_groovy.py file so they sync with the

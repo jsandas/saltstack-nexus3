@@ -45,7 +45,7 @@ def clear(name):
         ret['comment'] = 'Email configuration will be reset to defaults'
         return ret
 
-    reset_results = __salt__['nexus3.reset_email']()
+    reset_results = __salt__['nexus3_email.reset_email']()
 
     if 'error' in reset_results.keys():
         ret['result'] = False
@@ -160,7 +160,7 @@ def configure(name,
         ret['comment'] = 'Email configuration will be change to {}.'.format(email)
         return ret
 
-    configure_results = __salt__['nexus3.configure_email'](enabled,host,port,
+    configure_results = __salt__['nexus3_email.configure_email'](enabled,host,port,
                             use_truststore,username,password,email_from,subject_prefix,
                             starttls_enabled,starttls_required,tls_connect,tls_verify)
 
