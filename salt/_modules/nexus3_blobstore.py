@@ -29,13 +29,13 @@ blobstore_beta_path = 'beta/blobstores'
 blobstore_v1_path = 'v1/blobstores'
 
 
-def create_blobstore(name,
-                quota_type=None,
-                quota_limit=1000000,
-                store_type='file',
-                s3_bucket='',
-                s3_access_key_id='',
-                s3_secret_access_key=''):
+def create(name,
+        quota_type=None,
+        quota_limit=1000000,
+        store_type='file',
+        s3_bucket='',
+        s3_access_key_id='',
+        s3_secret_access_key=''):
     '''
     name (str):
         Name of blobstore
@@ -70,11 +70,13 @@ def create_blobstore(name,
         AWS Secret Access Key for S3 bucket (Default: '')
         .. note::
             The blobstore name is used for blobstore path.
-            
+
+    CLI Example:
+
     .. code-block:: bash
 
-        salt myminion nexus3_blobstore.create_blobstore name=myblobstore
-        salt myminion nexus3_blobstore.create_blobstore name=myblobstore quota_type=spaceRemainingQuota spaceRemainingQuota=5000000
+        salt myminion nexus3_blobstore.create name=myblobstore
+        salt myminion nexus3_blobstore.create name=myblobstore quota_type=spaceRemainingQuota spaceRemainingQuota=5000000
     '''
 
     ret = {
@@ -105,7 +107,7 @@ def create_blobstore(name,
     resp = nc.post(path, payload)
 
     if resp['status'] == 204:
-        ret['blobstore'] = describe_blobstore(name)['blobstore']
+        ret['blobstore'] = describe(name)['blobstore']
     else:
         ret['comment'] = 'Failed to create blobstore "{}".'.format(name)
         ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
@@ -114,14 +116,16 @@ def create_blobstore(name,
     return ret
 
 
-def delete_blobstore(name):
+def delete(name):
     '''
     name (str):
         Name of blobstore
 
+    CLI Example:
+
     .. code-block:: bash
 
-        salt myminion nexus3_blobstore.delete_blobstore name=myblobstore
+        salt myminion nexus3_blobstore.delete name=myblobstore
     '''
 
     ret = {
@@ -131,69 +135,69 @@ def delete_blobstore(name):
     path = '{}/{}'.format(blobstore_beta_path, name)
 
     nc = nexus3.NexusClient()
-
-    metadata = describe_blobstore(name)
-
-    if not metadata['blobstore']:
-        ret['comment'] = 'Blobstore "{}" does not exist.'.format(name)
-        return ret
-
     resp = nc.delete(path)
 
-    if resp['status'] != 204:
+    if resp['status'] == 404:
+        ret['comment'] = 'Blobstore "{}" does not exist.'.format(name)
+    elif resp['status'] !=204 :
         ret['comment'] = 'Failed to delete blobstore "{}".'.format(name)
         ret['error'] = '{} : {}'.format(resp['status'], resp['body'])
 
     return ret
 
 
-def describe_blobstore(name):
+def describe(name):
     '''
     name (str):
         Name of blobstore
 
+    CLI Example:
+
     .. code-block:: bash
 
-        salt myminion nexus3_blobstore.describe_blobstore name=myblobstore
+        salt myminion nexus3_blobstore.describe name=myblobstore
     '''
 
     ret = {
         'blobstore': {},
     }
 
-    nc = nexus3.NexusClient()
-    resp = nc.get(blobstore_beta_path)
+    resp = __salt__['nexus3_blobstore.list_all']()
+    log.warn('list: {}'.format(resp))
 
-    if resp['status'] == 200:
-        bstore_list = json.loads(resp['body'])
-
-        for bstore in bstore_list:
-            if bstore['name'] == name:
-                ret['blobstore'] = bstore
-                break
-    else:
+    if 'error' in resp.keys():
+        ret['result'] = False
         ret['comment'] = 'Failed to retrieve blobstore "{}".'.format(name)
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        ret['error'] = resp['error']
+        return ret        
+
+    for bstore in resp['blobstores']:
+        log.warn('item: {}'.format(bstore))
+        if bstore['name'] == name:
+            ret['blobstore'] = bstore
+            break
 
     return ret
 
 
-def list_blobstores():
+def list_all():
     '''
+    CLI Example:
+
     .. code-block:: bash
 
-        salt myminion nexus3_blobstore.list_blobstores
+        salt myminion nexus3_blobstore.list_all
     '''
 
     ret = {
-        'blobstore': {}
+        'blobstores': {}
     }
 
     nc = nexus3.NexusClient()
     resp = nc.get(blobstore_beta_path)
 
     if resp['status'] == 200:
-        ret['blobstore'] = json.loads(resp['body'])
+        ret['blobstores'] = json.loads(resp['body'])
     else:
         ret['comment'] = 'Failed to retrieve blobstores "{}".'
         ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
@@ -201,9 +205,9 @@ def list_blobstores():
     return ret
 
 
-def update_blobstore(name,
-                quota_type=None,
-                quota_limit=1000000):
+def update(name,
+        quota_type=None,
+        quota_limit=1000000):
     '''
     .. note::
         Only blobstore quotas can be updated
@@ -222,9 +226,11 @@ def update_blobstore(name,
             The limit should be no less than 1000000 bytes (1 MB) otherwise
             it does not display properly in the UI.
 
+    CLI Example:
+
     .. code-block:: bash
 
-        salt myminion nexus3_blobstore.create_blobstore name=myblobstore quota_type=spaceRemainingQuota quota_limit=5000000
+        salt myminion nexus3_blobstore.create name=myblobstore quota_type=spaceRemainingQuota quota_limit=5000000
     '''
 
     ret = {
@@ -241,7 +247,7 @@ def update_blobstore(name,
             'limit': quota_limit
         }
 
-    metadata = describe_blobstore(name)
+    metadata = describe(name)
 
     if not metadata['blobstore']:
         return metadata
@@ -253,7 +259,7 @@ def update_blobstore(name,
     resp = nc.put(path, payload)
 
     if resp['status'] == 204:
-        ret['blobstore'] = describe_blobstore(name)['blobstore']
+        ret['blobstore'] = describe(name)['blobstore']
     else:
         ret['comment'] = 'Failed to update blobstore "{}".'.format(name)
         ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])

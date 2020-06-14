@@ -42,7 +42,7 @@ def absent(name):
     }
 
     # get metadata of blobstore if it exists
-    meta = __salt__['nexus3_blobstore.describe_blobstore'](name)
+    meta = __salt__['nexus3_blobstore.describe'](name)
     exists = True
 
     if not meta['blobstore']:
@@ -61,7 +61,7 @@ def absent(name):
             ret['comment'] = 'blobstore {} will be deleted'.format(name)
             return ret
 
-        delete_results = __salt__['nexus3_blobstore.delete_blobstore'](name)
+        delete_results = __salt__['nexus3_blobstore.delete'](name)
         if 'error' in delete_results.keys():
             ret['result'] = False
             ret['comment'] = delete_results['error']
@@ -135,7 +135,7 @@ def present(name,
     }
 
     # get metadata of blobstore if it exists
-    meta = __salt__['nexus3_blobstore.describe_blobstore'](name)
+    meta = __salt__['nexus3_blobstore.describe'](name)
     exists = True
 
     if not meta['blobstore']:
@@ -181,7 +181,7 @@ def present(name,
                 update = True
 
             if update:
-                update_results = __salt__['nexus3_blobstore.update_blobstore'](name, quota_type, quota_limit)
+                update_results = __salt__['nexus3_blobstore.update'](name, quota_type, quota_limit)
                 if 'error' in update_results.keys():
                     ret['result'] = False
                     ret['comment'] = update_results['error']
@@ -190,7 +190,7 @@ def present(name,
                 ret['changes'] = update_results
 
         if meta['blobstore']['softQuota'] is None:
-            update_results = __salt__['nexus3_blobstore.update_blobstore'](name, quota_type, quota_limit)
+            update_results = __salt__['nexus3_blobstore.update'](name, quota_type, quota_limit)
             if 'error' in update_results.keys():
                 ret['result'] = False
                 ret['comment'] = update_results['error']
@@ -200,7 +200,7 @@ def present(name,
 
         return ret        
 
-    create_results = __salt__['nexus3_blobstore.create_blobstore'](name, quota_type, quota_limit, store_type)
+    create_results = __salt__['nexus3_blobstore.create'](name, quota_type, quota_limit, store_type)
     if 'error' in create_results.keys():
         ret['result'] = False
         ret['comment'] = create_results['error']

@@ -28,18 +28,18 @@ __outputter__ = {
 email_path = 'beta/email'
 
 
-def configure_email(enabled,
-                    host='localhost',
-                    port=25,
-                    use_truststore=False,
-                    username='',
-                    password='',
-                    email_from='nexus@example.org',
-                    subject_prefix='',
-                    starttls_enabled=False,
-                    starttls_required=False,
-                    tls_connect=False,
-                    tls_verify=False):
+def configure(enabled,
+            host='localhost',
+            port=25,
+            use_truststore=False,
+            username='',
+            password='',
+            email_from='nexus@example.org',
+            subject_prefix='',
+            starttls_enabled=False,
+            starttls_required=False,
+            tls_connect=False,
+            tls_verify=False):
     '''
     enabled (bool):
         enable email support [True|False]
@@ -85,11 +85,13 @@ def configure_email(enabled,
     tls_verify (bool):
         verify server certificate (Default: False)
 
+    CLI Example:
+
     .. code-block:: bash
 
-        salt myminion nexus3_email.configure_email enabled=True host=smtp.example.com
+        salt myminion nexus3_email.configure enabled=True host=smtp.example.com
 
-        salt myminion nexus3_email.configure_email enabled=False
+        salt myminion nexus3_email.configure enabled=False
     '''
 
     ret = {
@@ -119,17 +121,19 @@ def configure_email(enabled,
         ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
         return ret
     
-    email_config = get_email()
+    email_config = get()
     ret['email'] = email_config['email']
 
     return ret
 
 
-def get_email():
+def get():
     '''
+    CLI Example:
+
     .. code-block:: bash
 
-        salt myminion nexus3_email.get_email
+        salt myminion nexus3_email.get
     '''
 
     ret = {
@@ -148,11 +152,13 @@ def get_email():
     return ret
 
 
-def reset_email():
+def reset():
     '''
+    CLI Example:
+
     .. code-block:: bash
 
-        salt myminion nexus3_email.reset_email
+        salt myminion nexus3_email.reset
     '''
 
     ret = {}
@@ -169,14 +175,16 @@ def reset_email():
     return ret
 
 
-def verify_email(to):
+def verify(to):
     '''
+    CLI Example:
+    
     to (str):
         address to send test email to
     
     .. code-block:: bash
 
-        salt myminion nexus3_email.verify_email
+        salt myminion nexus3_email.verify
     '''
     ret = {}
 

@@ -6,7 +6,7 @@ client = salt.client.LocalClient()
 
 
 def test_configure_email():
-    ret = client.cmd('test.minion', 'nexus3.configure_email', ['enabled=True',
+    ret = client.cmd('test.minion', 'nexus3_email.configure', ['enabled=True',
         'host=notlocalhost','port=587','email_from=test@example.com','starttls_enabled=True'])
 
     print(ret)
@@ -19,11 +19,11 @@ def test_configure_email():
     assert ret['test.minion']['email']['startTlsEnabled'] == True,'starttls_enabled incorrect'
 
 
-def test_describe_email():
-    client.cmd('test.minion', 'nexus3.configure_email', ['enabled=True',
+def test_get_email():
+    client.cmd('test.minion', 'nexus3_email.configure', ['enabled=True',
         'host=notlocalhost','port=465','email_from=test@example.com','tls_connect=True'])
 
-    ret = client.cmd('test.minion', 'nexus3.describe_email')
+    ret = client.cmd('test.minion', 'nexus3_email.get')
 
     print(ret)
     assert ret['test.minion']['email']['host'] == 'notlocalhost','host incorrect'
@@ -36,8 +36,8 @@ def test_describe_email():
 
 
 # clean the slate
-client.cmd('test.minion', 'nexus3.reset_email')
+client.cmd('test.minion', 'nexus3_email.reset')
 
 test_configure_email()
 
-test_describe_email()
+test_get_email()
