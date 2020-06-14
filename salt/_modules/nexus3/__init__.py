@@ -39,6 +39,7 @@ def __virtual__():
 #### blobstore ####
 blobstore_beta_path = 'beta/blobstores'
 blobstore_v1_path = 'v1/blobstores'
+email_path = 'beta/email'
 
 def create_blobstore(name,
                 quota_type=None,
@@ -54,36 +55,31 @@ def create_blobstore(name,
             The blobstore name is used for blobstore path.  
 
     quota_type (str):
-        Optional: Quota type
-        Options: spaceRemainingQuota or spaceUsedQuota
-        Default: None
+        Quota type [None|spaceRemainingQuota|spaceUsedQuota] (Default: None)
 
     quota_limit (int):
-        Optional: Quota limit in bytes 
-        Default: 1000000
+        Quota limit in bytes (Default: 1000000)
         .. note::
             The limit should be no less than 1000000 bytes (1 MB) otherwise
             it does not display properly in the UI.
 
     store_type (str):
-        Optional: Type of blobstore
-        Options: file or s3
-        Default: file
+        Type of blobstore file|s3] (Default: file)
         .. note::
             S3 blobstores are currently untested.
 
     s3_bucket (str):
-        Optional: Name of S3 bucket
+        Name of S3 bucket (Default: '')
         .. note::
             S3 blobstores are currently untested.
 
     s3_access_key_id (str):
-        Optional: AWS Access Key for S3 bucket
+        AWS Access Key for S3 bucket (Default: '')
         .. note::
             S3 blobstores are currently untested.
 
     s3_secret_access_key (str):
-        Optional: AWS Secret Access Key for S3 bucket
+        AWS Secret Access Key for S3 bucket (Default: '')
         .. note::
             The blobstore name is used for blobstore path.
             
@@ -226,7 +222,8 @@ def update_blobstore(name,
                 quota_type=None,
                 quota_limit=1000000):
     '''
-    Only blobstore quotas can be updated
+    .. note::
+        Only blobstore quotas can be updated
 
     name (str):
         Name of blobstore
@@ -234,13 +231,10 @@ def update_blobstore(name,
             The blobstore name is used for blobstore path.
 
     quota_type (str):
-        Optional: Quota type
-        Options: spaceRemainingQuota or spaceUsedQuota
-        Default: None
+        Quota type [None|spaceRemainingQuota|spaceUsedQuota] (Default: None)
 
     quota_limit (int):
-        Optional: Quota limit in bytes 
-        Default: 1000000
+        Quota limit in bytes (Default: 1000000)
         .. note::
             The limit should be no less than 1000000 bytes (1 MB) otherwise
             it does not display properly in the UI.
@@ -283,4 +277,81 @@ def update_blobstore(name,
 
     return ret
 
-# print(create_blobstore("testing", "spaceRemainingQuta", 4000000))
+
+#### emails ####
+def configure_email(enabled=False,
+                    port=25,
+                    use_truststore=False,
+                    username='',
+                    password='',
+                    from_email='nexus@example.org',
+                    subject_prefix='',
+                    enable_starttls=False,
+                    require_starttls=False,
+                    tls_connect=False,
+                    tls_verify=False):
+    '''
+    enabled (bool):
+        enable email support [True|False] (Default: False)
+
+    port (int):
+        smtp port (Default: 25)
+
+    use_truststore (bool):
+        use nexus truststore [True|False] (Default: False)
+    .. code-block:: bash
+
+        salt myminion nexus3.describe_email
+    '''
+
+    ret = {
+        'email': {}
+    }
+
+    nc = utils.NexusClient()
+    resp = nc.get(email_path)
+
+    if resp['status'] == 200:
+        ret['email'] = json.loads(resp['body'])
+    else:
+        ret['comment'] = 'Failed to retrieve emails settings.'
+        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+
+    return ret
+
+{
+  "enabled": true,
+  "host": "string",
+  "port": 0,
+  "username": "string",
+  "password": "string",
+  "fromAddress": "nexus@example.org",
+  "subjectPrefix": "string",
+  "startTlsEnabled": true,
+  "startTlsRequired": true,
+  "sslOnConnectEnabled": true,
+  "sslServerIdentityCheckEnabled": true,
+  "nexusTrustStoreEnabled": true
+}
+
+def describe_email():
+    '''
+    .. code-block:: bash
+
+        salt myminion nexus3.describe_email
+    '''
+
+    ret = {
+        'email': {}
+    }
+
+    nc = utils.NexusClient()
+    resp = nc.get(email_path)
+
+    if resp['status'] == 200:
+        ret['email'] = json.loads(resp['body'])
+    else:
+        ret['comment'] = 'Failed to retrieve emails settings.'
+        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+
+    return ret

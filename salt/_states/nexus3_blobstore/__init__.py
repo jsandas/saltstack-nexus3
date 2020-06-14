@@ -20,9 +20,8 @@ log = logging.getLogger(__name__)
 
 def absent(name):
     '''
-    Args:
-        name (str):
-            Name of blobstore
+    name (str):
+        Name of blobstore
 
     .. code-block:: yaml
 
@@ -81,43 +80,37 @@ def present(name,
         s3_access_key_id='',
         s3_secret_access_key=''):
     '''
-    Args:
-        name (str):
-            Name of blobstore
+    name (str):
+        Name of blobstore
 
-        quota_type (str):
-            Optional: Quota type
-            Options: spaceRemainingQuota or spaceUsedQuota
-            Default: None
+    quota_type (str):
+        Quota type [None|spaceRemainingQuota|spaceUsedQuota] (Default: None)
 
-        quota_limit (int):
-            Optional: Quota size in bytes
-            Default: 1000000
-            .. note::
-                The limit should be no less than 1000000 bytes (1 MB) otherwise
-                it does not display properly in the UI.
+    quota_limit (int):
+        Quota size in bytes (Default: 1000000)
+        .. note::
+            The limit should be no less than 1000000 bytes (1 MB) otherwise
+            it does not display properly in the UI.
 
-        store_type (str):
-            Optional: Type of blobstore
-            Options: file or s3
-            Default: file
-            .. note::
-                The blobstore name is used for blobstore path.
+    store_type (str):
+        Type of blobstore [file|s3] (Default: file)
+        .. note::
+            The blobstore name is used for blobstore path.
 
-        s3_bucket (str):
-            Optional: Name of S3 bucket
-            .. note::
-                S3 blobstores are currently untested.
+    s3_bucket (str):
+        Name of S3 bucket (Default: '')
+        .. note::
+            S3 blobstores are currently untested.
 
-        s3_access_key_id (str):
-            Optional: AWS Access Key for S3 bucket
-            .. note::
-                S3 blobstores are currently untested.
+    s3_access_key_id (str):
+        AWS Access Key for S3 bucket (Default: '')
+        .. note::
+            S3 blobstores are currently untested.
 
-        s3_secret_access_key (str):
-            Optional: AWS Secret Access Key for S3 bucket
-            .. note::
-                S3 blobstores are currently untested.
+    s3_secret_access_key (str):
+        AWS Secret Access Key for S3 bucket (Default: '')
+        .. note::
+            S3 blobstores are currently untested.
 
 
     .. code-block:: yaml
