@@ -19,6 +19,17 @@ delete_test_blobstore:
   nexus3_blobstore.absent:
     - name: test
 
+setup_email:
+  nexus3_email.configure:
+    - enabled: True
+    - host: smtp@example.com
+    - port: 587
+    - email_from: test@example.com
+    - starttls_enabled: True
+
+clear_email:
+  nexus3_email.configure
+  
 # {% for role, data in nexus['roles'].items() %}
 # {{ role }}:
 #   nexus3.role:

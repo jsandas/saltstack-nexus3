@@ -144,16 +144,11 @@ def delete_blobstore(name):
 
     nc = utils.NexusClient()
 
-    # metadata = describe_blobstore(name)
+    metadata = describe_blobstore(name)
 
-    # if metadata['error'] is None:
-    #     ret['comment'] = 'Failed to delete blobstore "{}".'.format(name)
-    #     ret['error'] = '{}'.format(metadata['error'])
-    #     return metadata
-
-    # if not metadata['blobstore']:
-    #     ret['comment'] = 'Blobstore "{}" does not exist.'.format(name)
-    #     return ret
+    if not metadata['blobstore']:
+        ret['comment'] = 'Blobstore "{}" does not exist.'.format(name)
+        return ret
 
     resp = nc.delete(path)
 
@@ -278,61 +273,106 @@ def update_blobstore(name,
     return ret
 
 
-#### emails ####
+#### email ####
 def configure_email(enabled=False,
+                    host='localhost',
                     port=25,
                     use_truststore=False,
                     username='',
                     password='',
-                    from_email='nexus@example.org',
+                    email_from='nexus@example.org',
                     subject_prefix='',
-                    enable_starttls=False,
-                    require_starttls=False,
+                    starttls_enabled=False,
+                    starttls_required=False,
                     tls_connect=False,
                     tls_verify=False):
     '''
+    If no arguments are provided, the configuration will be
+    reset to default
+
     enabled (bool):
         enable email support [True|False] (Default: False)
+
+    host (string):
+        smtp hostname (Default: localhost)
 
     port (int):
         smtp port (Default: 25)
 
     use_truststore (bool):
         use nexus truststore [True|False] (Default: False)
+        .. note::
+            Ensure CA certificate is add to the Nexus trustore
+
+    username (str):
+        smtp username (Default: '')
+
+    password (str):
+        smtp password (Default: '')
+
+    email_from (str):
+        mail from address (Default: nexus@example.org)
+
+    subject_prefix (str):
+        prefix for subject in emails (Default: '')
+
+    starttls_enabled (bool):
+        enable starttls (Default: False)
+        .. note::
+            tls_connect and starttls should be mutually exclusive
+
+    starttls_required (bool):
+        require starttls (Default: False)
+        .. note::
+            tls_connect and starttls should be mutually exclusive
+
+    tls_connect (bool):
+        connect using tls (SMTPS) (Default: False)
+        .. note::
+            tls_connect and starttls should be mutually exclusive
+
+    tls_verify (bool):
+        verify server certificate (Default: False)
+
     .. code-block:: bash
 
-        salt myminion nexus3.describe_email
+        salt myminion nexus3.configure_email enabled=True host=smtp.example.com
+
+        salt myminion nexus3.configure_email
     '''
 
     ret = {
         'email': {}
     }
 
-    nc = utils.NexusClient()
-    resp = nc.get(email_path)
+    payload = {
+        "enabled": enabled,
+        "host": host,
+        "port": port,
+        "username": username,
+        "password": password,
+        "fromAddress": email_from,
+        "subjectPrefix": subject_prefix,
+        "startTlsEnabled": starttls_enabled,
+        "startTlsRequired": starttls_required,
+        "sslOnConnectEnabled": tls_connect,
+        "sslServerIdentityCheckEnabled": tls_verify,
+        "nexusTrustStoreEnabled": use_truststore
+        }
 
-    if resp['status'] == 200:
-        ret['email'] = json.loads(resp['body'])
-    else:
+    nc = utils.NexusClient()
+    resp = nc.put(email_path, payload)
+
+    if resp['status'] != 204:
         ret['comment'] = 'Failed to retrieve emails settings.'
         ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        return ret
+    
+    email_config = describe_email()
+    ret['email'] = email_config['email']
 
     return ret
 
-{
-  "enabled": true,
-  "host": "string",
-  "port": 0,
-  "username": "string",
-  "password": "string",
-  "fromAddress": "nexus@example.org",
-  "subjectPrefix": "string",
-  "startTlsEnabled": true,
-  "startTlsRequired": true,
-  "sslOnConnectEnabled": true,
-  "sslServerIdentityCheckEnabled": true,
-  "nexusTrustStoreEnabled": true
-}
 
 def describe_email():
     '''
@@ -351,7 +391,37 @@ def describe_email():
     if resp['status'] == 200:
         ret['email'] = json.loads(resp['body'])
     else:
-        ret['comment'] = 'Failed to retrieve emails settings.'
+        ret['comment'] = 'Failed to retrieve emails settings'
         ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
 
     return ret
+
+
+def verify_email(to):
+    '''
+    to (str):
+        address to send test email to
+    
+    .. code-block:: bash
+
+        salt myminion nexus3.verify_email
+    '''
+    ret = {}
+
+    verify_path = email_path + '/verify'
+
+    nc = utils.NexusClient()
+    resp = nc.post_str(verify_path, to)
+
+    if resp['status'] == 200:
+        status = json.loads(resp['body'])
+        if status['success']:
+            ret['comment'] = 'Success sending email to {}.'.format(to)
+        else:
+            ret['comment'] = 'Failed to send email.'
+            ret['error'] = status['reason']
+    else:
+        ret['comment'] = 'Failed to send email.'
+        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+
+    return ret   
