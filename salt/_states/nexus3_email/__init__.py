@@ -18,7 +18,7 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def reset(name):
+def clear(name):
     '''
     name (str):
         state id name
@@ -29,7 +29,7 @@ def reset(name):
     .. code-block:: yaml
 
         clear_email:
-          nexus3_email.reset
+          nexus3_email.clear
 
     '''
 
@@ -45,7 +45,7 @@ def reset(name):
         ret['comment'] = 'Email configuration will be reset to defaults'
         return ret
 
-    reset_results = __salt__['nexus3.configure_email']
+    reset_results = __salt__['nexus3.reset_email']()
 
     if 'error' in reset_results.keys():
         ret['result'] = False
@@ -58,7 +58,7 @@ def reset(name):
 
 
 def configure(name,
-            enabled=False,
+            enabled,
             host='localhost',
             port=25,
             use_truststore=False,
@@ -71,9 +71,6 @@ def configure(name,
             tls_connect=False,
             tls_verify=False):
     '''
-    If no arguments are provided, the configuration will be
-    reset to default
-
     name (str):
         state id name
         .. note::
@@ -81,7 +78,7 @@ def configure(name,
             because salt passes this arg always
 
     enabled (bool):
-        enable email support [True|False] (Default: False)
+        enable email support [True|False]
 
     host (string):
         smtp hostname (Default: localhost)
@@ -163,8 +160,11 @@ def configure(name,
         ret['comment'] = 'Email configuration will be change to {}.'.format(email)
         return ret
 
-    configure_results = __salt__['nexus3.configure_email']
+    configure_results = __salt__['nexus3.configure_email'](enabled,host,port,
+                            use_truststore,username,password,email_from,subject_prefix,
+                            starttls_enabled,starttls_required,tls_connect,tls_verify)
 
+    log.warn(configure_results)
     if 'error' in configure_results.keys():
         ret['result'] = False
         ret['comment'] = configure_results['error']

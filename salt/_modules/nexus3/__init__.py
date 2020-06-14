@@ -274,7 +274,7 @@ def update_blobstore(name,
 
 
 #### email ####
-def configure_email(enabled=False,
+def configure_email(enabled,
                     host='localhost',
                     port=25,
                     use_truststore=False,
@@ -287,11 +287,8 @@ def configure_email(enabled=False,
                     tls_connect=False,
                     tls_verify=False):
     '''
-    If no arguments are provided, the configuration will be
-    reset to default
-
     enabled (bool):
-        enable email support [True|False] (Default: False)
+        enable email support [True|False]
 
     host (string):
         smtp hostname (Default: localhost)
@@ -338,7 +335,7 @@ def configure_email(enabled=False,
 
         salt myminion nexus3.configure_email enabled=True host=smtp.example.com
 
-        salt myminion nexus3.configure_email
+        salt myminion nexus3.configure_email enabled=False
     '''
 
     ret = {
@@ -368,17 +365,17 @@ def configure_email(enabled=False,
         ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
         return ret
     
-    email_config = describe_email()
+    email_config = get_email()
     ret['email'] = email_config['email']
 
     return ret
 
 
-def describe_email():
+def get_email():
     '''
     .. code-block:: bash
 
-        salt myminion nexus3.describe_email
+        salt myminion nexus3.get_email
     '''
 
     ret = {
@@ -391,7 +388,28 @@ def describe_email():
     if resp['status'] == 200:
         ret['email'] = json.loads(resp['body'])
     else:
-        ret['comment'] = 'Failed to retrieve emails settings'
+        ret['comment'] = 'Failed to retrieve email settings'
+        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+
+    return ret
+
+
+def reset_email():
+    '''
+    .. code-block:: bash
+
+        salt myminion nexus3.reset_email
+    '''
+
+    ret = {}
+
+    nc = utils.NexusClient()
+    resp = nc.delete(email_path)
+
+    if resp['status'] == 204:
+        ret['comment'] = 'Email settings reset'
+    else:
+        ret['comment'] = 'Failed to reset email settings'
         ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
 
     return ret

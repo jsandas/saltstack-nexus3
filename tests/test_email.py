@@ -36,7 +36,7 @@ def test_describe_email():
 
 
 # clean the slate
-client.cmd('test.minion', 'nexus3.configure_email')
+client.cmd('test.minion', 'nexus3.reset_email')
 
 test_configure_email()
 
