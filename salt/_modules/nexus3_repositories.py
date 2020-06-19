@@ -29,113 +29,163 @@ repo_beta_path = 'beta/repositories'
 repo_v1_path = 'v1/repositories'
 
 
-def delete(name):
+def group(name,
+        repo_format,
+        blobstore='default',
+        group_members=[],
+        docker_v1_enabled=False,
+        docker_force_auth=True,
+        docker_http_port=None,
+        docker_https_port=None,
+        strict_content_validation=True,
+        **kwargs):
+
     '''
+    Nexus 3 supports many different formats.  The bower, docker, maven, and nuget formats have built-in arguments.
+    Parameters for other formats may be supplied as a dictionary as kwargs.  This would be useful for any new formats
+    add to Nexus.
+
     name (str):
-        name of repository
+        Name of repository
     
+    repo_format (str):
+        Format of repository [bower|cocoapads|conan|docker|etc.]
+        .. note::
+            This can be any officaly supported repository format for Nexus
+
+    blobstore (str):
+        Name of blobstore to use (Default: default)
+
+    group_members (list):
+        List of repositories in group (Default: [])
+        .. note::
+            The list cannot be empty.  An error will be returned
+
+    docker_v1_enabled (bool):
+        Enable v1 api support [True|False] (Default: False)
+
+    docker_force_auth (bool):
+        Force basic authentication [True|False] (Default: True)
+
+    docker_http_port (int):
+        HTTP port for docker api (Default: None)
+        .. note::
+            Normally used if the server is behind a secure proxy
+
+    docker_https_port (int):
+        HTTPS port for docker api (Default: None)
+        .. note::
+            Normally used if the server is configured for https
+
+    strict_content_validation (bool):
+        Enable strict content type validation [True|False] (Default: True)
+
+    kwargs (dict):
+        Any additional parameters for specific repository formats passed as a dictionary. 
+        Check the Nexus 3 API docs for more information on other formats.
+        .. example::
+            yum='{'repodataDepth': 0, 'deployPolicy': 'STRICT'}
+        .. note::
+            The above example is for reference.  Yum repository groups do not have additional arguments.
+  }
+
     CLI Example:
 
     .. code-block:: bash
 
-        salt myminion nexus3_repository.delete name=maven-central
+        salt myminion nexus3_repositories.group name=test-yum-group repo_format=yum group_members=['test-yum']
     '''
 
     ret = {
-        'comment': 'Repository {} deleted'.format(name)
+        'repository': {},
     }
 
-    delete_path = repo_beta_path + '/' + name
-
-    nc = nexus3.NexusClient()
-    resp = nc.delete(delete_path)
-
-    if resp['status'] == 404:
-        ret['comment'] = 'Repository {} not found.'.format(name)
-    elif resp['status'] != 204:
-        ret['comment'] = 'Error deleting repository {}.'.format(name)
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
-
-    return ret
-
-
-def describe(name):
-    '''
-    name (str):
-        name of repository
-    
-    CLI Example:
-
-    .. code-block:: bash
-
-        salt myminion nexus3_repository.describe name=maven-central
-    '''
-
-    ret = {
-        'repository': {}
+    payload = {
+        'name': name,
+        'online': True,
+        'storage': {
+            'blobStoreName': blobstore,
+            'strictContentTypeValidation': strict_content_validation,
+        },
+        'group': {
+            'memberNames': group_members
+        }
     }
 
-    nc = nexus3.NexusClient()
-    resp = nc.get(repo_beta_path)
+    docker = {
+        'docker': {
+            'v1Enabled': docker_v1_enabled,
+            'forceBasicAuth': docker_force_auth,
+        }
+    }
 
-    if resp['status'] != 200:
-        ret['comment'] = 'Error restrieving repository information for {}.'.format(name)
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+    if repo_format == 'docker':
+        if docker_http_port is not None:
+            docker['docker']['httpPort'] = docker_http_port
+        if docker_https_port is not None:
+            docker['docker']['httpsPort'] = docker_https_port
+        payload.update(docker)
+
+    if kwargs:
+        payload.update(kwargs)
+
+    metadata = describe(name)
+
+    update = False
+    if metadata['repository']:
+        update = True
+
+    if not group_members:
+        if update:
+            ret['comment'] = 'Failed to update repository {}.'.format(name)
+        else:
+            ret['comment'] = 'Failed to create repository {}.'.format(name)
+
+        ret['error'] = 'group_members cannot be empty'
         return ret
 
-    repo_dict = json.loads(resp['body'])
-    for repo in repo_dict:
-        if repo['name'] == name:
-            ret['repository'] = repo
-
-    return ret
-
-
-def list_all():
-    '''
-    CLI Example:
-
-    .. code-block:: bash
-
-        salt myminion nexus3_repositories.list_all
-
-    '''
-
-    ret = {
-        'repositories': {}
-    }
-
     nc = nexus3.NexusClient()
-    resp = nc.get(repo_v1_path)
 
-    if resp['status'] != 200:
-        ret['comment'] = 'Error retrieving repositories.'
+    if update:
+        update_path = repo_beta_path + '/' + repo_format + '/group/' + name
+        resp = nc.put(update_path, payload)
+        ret['comment'] = 'Updated respository {}.'.format(name)
+    else:
+        create_path = repo_beta_path + '/' + repo_format + '/group'
+        resp = nc.post(create_path, payload)
+        ret['comment'] = 'Created respository {}.'.format(name)
+
+    if resp['status'] == 201 or resp['status'] == 204:
+        ret['repository'] = describe(name)['repository']
+    else:
+        if update:
+            ret['comment'] = 'Failed to update repository {}.'.format(name)
+        else:
+            ret['comment'] = 'Failed to create repository {}.'.format(name)
+
         ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
-        return ret
-    
-    ret['repositories'] = resp['body']
 
     return ret
 
 
-def create_hosted(name,
-                repo_format,
-                blobstore='default',
-                write_policy='allow_once',
-                cleanup_policies=[],
-                apt_dist_name='bionic',
-                apt_gpg_priv_key='',
-                apt_gpg_passphrase='',
-                docker_v1_enabled=False,
-                docker_force_auth=True,
-                docker_http_port=None,
-                docker_https_port=None,
-                maven_version_policy='MIXED',
-                maven_layout_policy='STRICT',
-                yum_repodata_depth=0,
-                yum_deploy_policy='STRICT',
-                strict_content_validation=True,
-                **kwargs):
+def hosted(name,
+        repo_format,
+        blobstore='default',
+        write_policy='allow_once',
+        cleanup_policies=[],
+        apt_dist_name='bionic',
+        apt_gpg_priv_key='',
+        apt_gpg_passphrase='',
+        docker_v1_enabled=False,
+        docker_force_auth=True,
+        docker_http_port=None,
+        docker_https_port=None,
+        maven_version_policy='MIXED',
+        maven_layout_policy='STRICT',
+        yum_repodata_depth=0,
+        yum_deploy_policy='STRICT',
+        strict_content_validation=True,
+        **kwargs):
 
     '''
     Nexus 3 supports many different formats.  The apt, bower, docker, maven, and nuget formats have built-in arguments.
@@ -158,9 +208,6 @@ def create_hosted(name,
 
     cleanup_policies (list):
         List of cleanup policies to apply to repository (Default: [])
-
-    content_max_age (int):
-        Max age of content cache in seconds (Default: 1440)
 
     apt_dist_name (str):
         Apt distribution name (Default: bionic)
@@ -203,7 +250,7 @@ def create_hosted(name,
 
     strict_content_validation (bool):
         Enable strict content type validation [True|False] (Default: True)
-    
+
     kwargs (dict):
         Any additional parameters for specific repository formats passed as a dictionary. 
         Check the Nexus 3 API docs for more information on other formats.
@@ -292,43 +339,53 @@ def create_hosted(name,
 
     metadata = describe(name)
 
+    update = False
     if metadata['repository']:
-        ret['comment'] = 'Repository {} already exists.'.format(name)
-        return ret
-
-    create_path = repo_beta_path + '/' + repo_format + '/hosted'
+        update = True
 
     nc = nexus3.NexusClient()
-    resp = nc.post(create_path, payload)
 
-    if resp['status'] == 201:
+    if update:
+        update_path = repo_beta_path + '/' + repo_format + '/hosted/' + name
+        resp = nc.put(update_path, payload)
+        ret['comment'] = 'Updated respository {}.'.format(name)
+    else:
+        create_path = repo_beta_path + '/' + repo_format + '/hosted'
+        resp = nc.post(create_path, payload)
+        ret['comment'] = 'Created respository {}.'.format(name)
+
+    if resp['status'] == 201 or resp['status'] == 204:
         ret['repository'] = describe(name)['repository']
     else:
-        ret['comment'] = 'Failed to create repository {}.'.format(name)
+        if update:
+            ret['comment'] = 'Failed to update repository {}.'.format(name)
+        else:
+            ret['comment'] = 'Failed to create repository {}.'.format(name)
+
         ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
 
     return ret
 
 
-def create_proxy(name,
-                repo_format,
-                remote_url,
-                blobstore='default',
-                cleanup_policies=[],
-                content_max_age=1440,
-                apt_dist_name='bionic',
-                apt_flat_repo=False,
-                bower_rewrite_urls=True,
-                docker_index_type='HUB',
-                docker_index_url='',
-                maven_version_policy='MIXED',
-                maven_layout_policy='STRICT',
-                nuget_cache_max_age=3600,
-                metadata_max_age=1440,
-                remote_password=None,
-                remote_username=None,
-                strict_content_validation=True,
-                **kwargs):
+def proxy(name,
+        repo_format,
+        remote_url,
+        blobstore='default',
+        cleanup_policies=[],
+        content_max_age=1440,
+        apt_dist_name='bionic',
+        apt_flat_repo=False,
+        bower_rewrite_urls=True,
+        docker_index_type='HUB',
+        docker_index_url='',
+        maven_version_policy='MIXED',
+        maven_layout_policy='STRICT',
+        nuget_cache_max_age=3600,
+        metadata_max_age=1440,
+        remote_password=None,
+        remote_username=None,
+        strict_content_validation=True,
+        **kwargs):
 
     '''
     Nexus 3 supports many different formats.  The apt, bower, docker, maven, and nuget formats have built-in arguments.
@@ -394,7 +451,7 @@ def create_proxy(name,
 
     strict_content_validation (bool):
         Enable strict content type validation [True|False] (Default: True)
-    
+
     kwargs (dict):
         Any additional parameters for specific repository formats passed as a dictionary. 
         Check the Nexus 3 API docs for more information on other formats.
@@ -408,9 +465,9 @@ def create_proxy(name,
 
     .. code-block:: bash
 
-        salt myminion nexus3.repositories.create_proxy name=test_raw repo_format=raw blobstore=raw_blobstore
+        salt myminion nexus3.repositories.proxy name=test_raw repo_format=raw blobstore=raw_blobstore
 
-        salt myminion nexus3_repositories.create_proxy name=test_apt repo_format=apt remote_url=http://test.example.com remote_username=bob remote_password=testing apt='{'distribution': 'bionic', 'flat':
+        salt myminion nexus3_repositories.proxy name=test_apt repo_format=apt remote_url=http://test.example.com remote_username=bob remote_password=testing apt='{'distribution': 'bionic', 'flat':
  False}'
     '''
 
@@ -515,19 +572,118 @@ def create_proxy(name,
 
     metadata = describe(name)
 
+    update = False
     if metadata['repository']:
-        ret['comment'] = 'Repository {} already exists.'.format(name)
-        return ret
-
-    create_path = repo_beta_path + '/' + repo_format + '/proxy'
+        update = True
 
     nc = nexus3.NexusClient()
-    resp = nc.post(create_path, payload)
 
-    if resp['status'] == 201:
+    if update:
+        update_path = repo_beta_path + '/' + repo_format + '/proxy/' + name
+        resp = nc.put(update_path, payload)
+        ret['comment'] = 'Updated respository {}.'.format(name)
+    else:
+        create_path = repo_beta_path + '/' + repo_format + '/proxy'
+        resp = nc.post(create_path, payload)
+        ret['comment'] = 'Created respository {}.'.format(name)
+
+    if resp['status'] == 201 or resp['status'] == 204:
         ret['repository'] = describe(name)['repository']
     else:
-        ret['comment'] = 'Failed to create repository {}.'.format(name)
+        if update:
+            ret['comment'] = 'Failed to update repository {}.'.format(name)
+        else:
+            ret['comment'] = 'Failed to create repository {}.'.format(name)
+
         ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+
+    return ret
+
+
+def delete(name):
+    '''
+    name (str):
+        name of repository
+    
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt myminion nexus3_repository.delete name=maven-central
+    '''
+
+    ret = {
+        'comment': 'Repository {} deleted'.format(name)
+    }
+
+    delete_path = repo_beta_path + '/' + name
+
+    nc = nexus3.NexusClient()
+    resp = nc.delete(delete_path)
+
+    if resp['status'] == 404:
+        ret['comment'] = 'Repository {} not found.'.format(name)
+    elif resp['status'] != 204:
+        ret['comment'] = 'Error deleting repository {}.'.format(name)
+        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+
+    return ret
+
+
+def describe(name):
+    '''
+    name (str):
+        name of repository
+    
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt myminion nexus3_repository.describe name=maven-central
+    '''
+
+    ret = {
+        'repository': {}
+    }
+
+    nc = nexus3.NexusClient()
+    resp = nc.get(repo_beta_path)
+
+    if resp['status'] != 200:
+        ret['comment'] = 'Error restrieving repository information for {}.'.format(name)
+        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        return ret
+
+    repo_dict = json.loads(resp['body'])
+    for repo in repo_dict:
+        if repo['name'] == name:
+            ret['repository'] = repo
+
+    return ret
+
+
+def list_all():
+    '''
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt myminion nexus3_repositories.list_all
+
+    '''
+
+    ret = {
+        'repositories': {}
+    }
+
+    nc = nexus3.NexusClient()
+    resp = nc.get(repo_v1_path)
+
+    if resp['status'] != 200:
+        ret['comment'] = 'Error retrieving repositories.'
+        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        return ret
+    
+    ret['repositories'] = resp['body']
 
     return ret
