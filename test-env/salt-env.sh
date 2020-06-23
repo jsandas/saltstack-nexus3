@@ -13,18 +13,16 @@ docker_shell () {
 start () {
     docker-compose pull
     docker-compose up -d
-    vagrant up
 }
 
 stop () {
-    vagrant destroy
     docker-compose down
 }
 
 reload () {
     docker exec -it salt-master salt-key -D -y
-    vagrant -f destroy
-    vagrant up
+    docker rm -f salt-minion
+    docker-compose up -d    
 }
 
 usage () {
