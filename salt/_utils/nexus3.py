@@ -8,33 +8,38 @@ import json
 import logging
 
 import requests
+import salt.config
+
+__opts__ = salt.config.minion_config("/etc/salt/minion")
+__salt__ = salt.loader.minion_mods(__opts__)
 
 log = logging.getLogger(__name__)
 
 base_api_path = 'service/rest'
 
 
+# TODO: revisit the error handling
 def _get_config():
     '''
     Gets configuration from minion config/pillars
     '''
-    defaults = {'host':     'http://127.0.0.1:8081',
-                'user':     'admin',
-                'password': 'admin123'}
+    conn_info = {'hostname': 'http://127.0.0.1:8081',
+                'username': '',
+                'password': ''}
 
-    # conn_info = {}
-    # _opts = __salt__['config.option']('nexus3')
-    # default_addrs_used = []
-    # for attr in defaults:
-    #     if attr not in _opts:
-    #         default_addrs_used.append(attr)
-    #         conn_info[attr] = defaults[attr]
-    #         continue
-    #     conn_info[attr] = _opts[attr]
-    # if default_addrs_used:
-    #     log.info('Using default value for Nexus3: {0}'.format(default_addrs_used))
+    _opts = __salt__['config.option']('nexus3')
+    
+    missing_args = []
+    for attr in conn_info:
+        if attr not in _opts:
+            missing_args.append(attr)
+            continue
+        conn_info[attr] = _opts[attr]
 
-    return defaults
+    if missing_args:
+        log.error('The following connection details are missing: {}'.format(missing_args))
+
+    return conn_info
 
 
 class NexusClient:
@@ -45,9 +50,12 @@ class NexusClient:
     def __init__(self):
         config = _get_config()
 
-        self.username = config['user']
-        self.password = config['password']
-        self.base_url = '{}/{}'.format(config['host'], base_api_path)
+        try:
+            self.username = config['username']
+            self.password = config['password']
+            self.base_url = '{}/{}'.format(config['hostname'], base_api_path)
+        except Exception as e:
+            log.error('error with nexus 3 connection info: {}'.format(e))
 
     def delete(self, path):
         '''
