@@ -27,6 +27,7 @@ services:
 
   nexus3:
     image: sonatype/nexus3:latest
+    container_name: nexus3
     ports:
       - "8081:8081"
       - "5000:5000"
