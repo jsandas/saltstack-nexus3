@@ -21,6 +21,8 @@ Use temp admin password to login into Nexus http://localhost:8081
 
 Set admin password to "admin123"
 
+Log out of Nexus 3
+
 Switch to cli in salt-master container
 ```bash
 ./salt-env.sh cmd

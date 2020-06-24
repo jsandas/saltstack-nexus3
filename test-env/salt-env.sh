@@ -13,22 +13,24 @@ start () {
     docker-compose pull
     docker-compose up -d
     
-    # sync salt files for the first time
-    docker exec salt-master sh -c 'salt \* saltutil.sync_all' > /dev/null 2>&1
-
     printf "\n Waiting for admin.password to be generated"
     _dur=0
     until docker exec nexus3 bash -c 'test -f /nexus-data/admin.password'
     do
         if [ $_dur -gt 30 ]; then
             echo "Couldn't get admin password"
+            echo "Please check containers logs for details"
             exit 1
         fi
         _dur=$((_dur+1))
         sleep 1
         echo -ne "."
     done
-    
+
+    # sync salt files for the first time
+    docker exec salt-master sh -c 'salt \* saltutil.sync_all' > /dev/null 2>&1
+    docker-compose restart salt-minion
+
     printf "\nadmin password: $(docker exec nexus3 bash -c 'cat /nexus-data/admin.password')\n"
 }
 
