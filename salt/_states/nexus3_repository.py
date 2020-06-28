@@ -174,18 +174,44 @@ def present(name,
         'comment': ''
     }
 
+    metadata = __salt__['nexus3_repository.describe'](name=name)
+
     if __opts__['test']:
         ret['result'] = None
-        ret['comment'] = 'Email configuration will be reset to defaults'
+        ret['comment'] = ''
+
+
+        if not metadata['repository']:            
+            ret['comment'] = 'Repository {} will be created. Type: {} Format: {}'.format(name, repo_type, repo_format)
+        else:
+            ret['comment'] = 'Repository {} will be updated. Type: {} Format: {}'.format(name, repo_type, repo_format)
         return ret
 
-    reset_results = __salt__['nexus3_repositories.r']()
+    if repo_type == 'group':
+        group_resp = __salt__['nexus3_repository.group'](name,
+                                            repo_format,
+                                            blobstore,
+                                            docker_force_auth,
+                                            docker_http_port,
+                                            docker_https_port,
+                                            docker_v1_enabled,
+                                            group_members,
+                                            strict_content_validation,
+                                            **kwargs)
 
-    if 'error' in reset_results.keys():
-        ret['result'] = False
-        ret['comment'] = reset_results['error']
-        return ret        
+        if 'error' in group_resp.keys():
+            ret['result'] = False
+            ret['comment'] = group_resp['error']
+            return ret
 
-    ret['changes'] = reset_results
+        
+    # reset_results = __salt__['nexus3_repositories.r']()
+
+    # if 'error' in reset_results.keys():
+    #     ret['result'] = False
+    #     ret['comment'] = reset_results['error']
+    #     return ret        
+
+    # ret['changes'] = reset_results
 
     return ret

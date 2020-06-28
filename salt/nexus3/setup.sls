@@ -30,6 +30,15 @@ setup_email:
 clear_email:
   nexus3_email.clear
   
+yum-hosted:
+  nexus3_repository.present:
+    - repo_format: yum
+    - repo_type: hosted
+    - yum_repodata_depth: 0
+    - yum_deploy_policy:  permissive
+    - strict_content_validation: True
+
+
 # {% for role, data in nexus['roles'].items() %}
 # {{ role }}:
 #   nexus3.role:
