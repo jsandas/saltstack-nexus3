@@ -164,7 +164,6 @@ def configure(name,
                             use_truststore,username,password,email_from,subject_prefix,
                             starttls_enabled,starttls_required,tls_connect,tls_verify)
 
-    log.warn(configure_results)
     if 'error' in configure_results.keys():
         ret['result'] = False
         ret['comment'] = configure_results['error']
