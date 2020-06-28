@@ -30,6 +30,29 @@ setup_email:
 clear_email:
   nexus3_email.clear
   
+yum-proxy:
+  nexus3_repository.present:
+    - repo_format: yum
+    - repo_type: proxy
+    - remote_url: http://mirror.centos.org/centos/7/os/x86_64/
+    - content_max_age: 3600
+
+create-yum-hosted:
+  nexus3_repository.present:
+    - name: yum-hosted
+    - repo_format: yum
+    - repo_type: hosted
+    - yum_repodata_depth: 0
+    - yum_deploy_policy:  permissive
+    - strict_content_validation: True
+
+delete-yum-hosted:
+  nexus3_repository.absent:
+    - name: yum-hosted
+
+nonexistent-repo:
+  nexus3_repository.absent
+
 # {% for role, data in nexus['roles'].items() %}
 # {{ role }}:
 #   nexus3.role:

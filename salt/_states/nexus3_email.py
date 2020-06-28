@@ -157,14 +157,13 @@ def configure(name,
 
     if __opts__['test']:
         ret['result'] = None
-        ret['comment'] = 'Email configuration will be change to {}.'.format(email)
+        ret['comment'] = 'Email configuration will change to {}.'.format(email)
         return ret
 
     configure_results = __salt__['nexus3_email.configure'](enabled,host,port,
                             use_truststore,username,password,email_from,subject_prefix,
                             starttls_enabled,starttls_required,tls_connect,tls_verify)
 
-    log.warn(configure_results)
     if 'error' in configure_results.keys():
         ret['result'] = False
         ret['comment'] = configure_results['error']

@@ -32,11 +32,11 @@ repo_v1_path = 'v1/repositories'
 def group(name,
         repo_format,
         blobstore='default',
-        group_members=[],
-        docker_v1_enabled=False,
         docker_force_auth=True,
         docker_http_port=None,
         docker_https_port=None,
+        docker_v1_enabled=False,
+        group_members=[],
         strict_content_validation=True,
         **kwargs):
 
@@ -56,14 +56,6 @@ def group(name,
     blobstore (str):
         Name of blobstore to use (Default: default)
 
-    group_members (list):
-        List of repositories in group (Default: [])
-        .. note::
-            The list cannot be empty.  An error will be returned
-
-    docker_v1_enabled (bool):
-        Enable v1 api support [True|False] (Default: False)
-
     docker_force_auth (bool):
         Force basic authentication [True|False] (Default: True)
 
@@ -76,6 +68,14 @@ def group(name,
         HTTPS port for docker api (Default: None)
         .. note::
             Normally used if the server is configured for https
+
+    docker_v1_enabled (bool):
+        Enable v1 api support [True|False] (Default: False)
+
+    group_members (list):
+        List of repositories in group (Default: [])
+        .. note::
+            The list cannot be empty.  An error will be returned
 
     strict_content_validation (bool):
         Enable strict content type validation [True|False] (Default: True)
@@ -170,21 +170,21 @@ def group(name,
 
 def hosted(name,
         repo_format,
-        blobstore='default',
-        write_policy='allow_once',
-        cleanup_policies=[],
         apt_dist_name='bionic',
-        apt_gpg_priv_key='',
         apt_gpg_passphrase='',
-        docker_v1_enabled=False,
+        apt_gpg_priv_key='',
+        blobstore='default',
+        cleanup_policies=[],
         docker_force_auth=True,
         docker_http_port=None,
         docker_https_port=None,
-        maven_version_policy='MIXED',
+        docker_v1_enabled=False,
         maven_layout_policy='STRICT',
-        yum_repodata_depth=0,
-        yum_deploy_policy='STRICT',
+        maven_version_policy='MIXED',
         strict_content_validation=True,
+        yum_deploy_policy='STRICT',
+        yum_repodata_depth=0,
+        write_policy='allow_once',
         **kwargs):
 
     '''
@@ -200,28 +200,22 @@ def hosted(name,
         .. note::
             This can be any officaly supported repository format for Nexus
 
-    blobstore (str):
-        Name of blobstore to use (Default: default)
-
-    write_policy (str):
-        Controls if deployments of and updates to artifacts are allowed [allow|allow_once|deny] (Default: allow)
-
-    cleanup_policies (list):
-        List of cleanup policies to apply to repository (Default: [])
-
     apt_dist_name (str):
         Apt distribution name (Default: bionic)
+
+    apt_gpg_passphrase (str):
+        GPG signing private key passphrase (Default: '')
 
     apt_gpg_priv_key (str):
         GPG signing private key (Default: '')
         .. note::
             This is require for hosted apt repositories
 
-    apt_gpg_passphrase (str):
-        GPG signing private key passphrase (Default: '')
+    blobstore (str):
+        Name of blobstore to use (Default: default)
 
-    docker_v1_enabled (bool):
-        Enable v1 api support [True|False] (Default: False)
+    cleanup_policies (list):
+        List of cleanup policies to apply to repository (Default: [])
 
     docker_force_auth (bool):
         Force basic authentication [True|False] (Default: True)
@@ -236,20 +230,26 @@ def hosted(name,
         .. note::
             Normally used if the server is configured for https
 
-    maven_version_policy (str):
-        Type of marven artificats this repository stores [RELEASE|SNAPSHOT|MIXED] (default: MIXED)
+    docker_v1_enabled (bool):
+        Enable v1 api support [True|False] (Default: False)
 
     maven_layout_policy (str):
         Validate all paths are maven artifacts or metadata paths [STRICT|PERMISSIVE] (default: STRICT)
 
-    yum_repodata_depth (int):
-        Specifies the repository depth where repodata folder(s) are created (Default: 0)
+    maven_version_policy (str):
+        Type of marven artificats this repository stores [RELEASE|SNAPSHOT|MIXED] (default: MIXED)
+
+    strict_content_validation (bool):
+        Enable strict content type validation [True|False] (Default: True)
 
     yum_deploy_policy (str):
         Validate that all paths are RPMs or yum metadata [STRICT|PERMISSIVE] (Default: STRICT)
 
-    strict_content_validation (bool):
-        Enable strict content type validation [True|False] (Default: True)
+    yum_repodata_depth (int):
+        Specifies the repository depth where repodata folder(s) are created (Default: 0)
+
+    write_policy (str):
+        Controls if deployments of and updates to artifacts are allowed [allow|allow_once|deny] (Default: allow_once)
 
     kwargs (dict):
         Any additional parameters for specific repository formats passed as a dictionary. 
@@ -370,18 +370,18 @@ def hosted(name,
 def proxy(name,
         repo_format,
         remote_url,
-        blobstore='default',
-        cleanup_policies=[],
-        content_max_age=1440,
         apt_dist_name='bionic',
         apt_flat_repo=False,
+        blobstore='default',
         bower_rewrite_urls=True,
+        cleanup_policies=[],
+        content_max_age=1440,
         docker_index_type='HUB',
         docker_index_url='',
-        maven_version_policy='MIXED',
         maven_layout_policy='STRICT',
-        nuget_cache_max_age=3600,
+        maven_version_policy='MIXED',
         metadata_max_age=1440,
+        nuget_cache_max_age=3600,
         remote_password=None,
         remote_username=None,
         strict_content_validation=True,
@@ -403,23 +403,23 @@ def proxy(name,
     remote_url (str):
         Remote url to proxy
 
-    blobstore (str):
-        Name of blobstore to use (Default: default)
-    
-    cleanup_policies (list):
-        List of cleanup policies to apply to repository (Default: [])
-
-    content_max_age (int):
-        Max age of content cache in seconds (Default: 1440)
-
     apt_dist_name (str):
         Apt distribution name (Default: bionic)
 
     apt_flat_repo (bool):
         Repo is flat ie: no folders (Default: False)
 
+    blobstore (str):
+        Name of blobstore to use (Default: default)
+
     bower_rewrite_urls (bool):
         Bower rewrite urls (Default: True)
+    
+    cleanup_policies (list):
+        List of cleanup policies to apply to repository (Default: [])
+
+    content_max_age (int):
+        Max age of content cache in seconds (Default: 1440)
 
     docker_index_type (str):
         Type of index for docker registry [REGISTRY|HUB|CUSTOM] (Default: HUB)
@@ -431,23 +431,23 @@ def proxy(name,
         .. note::
             If using CUSTOM then docker_index_url must be specified
 
-    maven_version_policy (str):
-        Type of marven artificats this repository stores [RELEASE|SNAPSHOT|MIXED] (default: MIXED)
-
     maven_layout_policy (str):
         Validate all paths are maven artifacts or metadata paths [STRICT|PERMISSIVE] (default: STRICT)
 
-    nuget_cache_max_age (int):
-        Nuget cache max age in seconds (Default: 3600)
+    maven_version_policy (str):
+        Type of marven artificats this repository stores [RELEASE|SNAPSHOT|MIXED] (default: MIXED)
 
     metadata_max_age (int):
         Max age of metadata cache in seconds (Default: 1440)
 
-    remote_username (str):
-        Username for remote url (Default: None)
+    nuget_cache_max_age (int):
+        Nuget cache max age in seconds (Default: 3600)
 
     remote_password (str):
         Password for remote url (Default: None)
+
+    remote_username (str):
+        Username for remote url (Default: None)
 
     strict_content_validation (bool):
         Enable strict content type validation [True|False] (Default: True)
@@ -459,7 +459,6 @@ def proxy(name,
             apt='{'distribution': 'bionic', 'flat': False}'
         .. note::
             The above example is for reference.  Apt is fully supported with arguments in this function.
-  }
 
     CLI Example:
 
@@ -622,7 +621,7 @@ def delete(name):
     resp = nc.delete(delete_path)
 
     if resp['status'] == 404:
-        ret['comment'] = 'Repository {} not found.'.format(name)
+        ret['comment'] = 'Repository {} not present.'.format(name)
     elif resp['status'] != 204:
         ret['comment'] = 'Error deleting repository {}.'.format(name)
         ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])

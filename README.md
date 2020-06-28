@@ -10,8 +10,6 @@ Copy the _states, _modules folder the the files_root on the saltmaster (usually 
 
 The files in the nexus3 folder as well as the pillar data can be used as examples for using these modules.
 
-These example files will create the local user and directory for Nexus and download/start the docker container.  Feel free to adapt to your needs.  It is recommended to use a reverse proxy in front of Nexus for SSL termination in production.
-
 The nexus3 state module depends on python requests library which should already be installed when the salt minion was installed.
 
 Configuration:
@@ -22,7 +20,7 @@ In order to connect to Nexus 3, credentials can be provided through the minion c
       user: 'admin'
       pass: 'admin123'
 
-If no credentials are provided in the minion configuration file, the defaults for Nexus 3 are used instead. (Update) Nexus 3 now autogenerates the admin password on new installations.
+If no credentials are provided in the minion configuration file.  If setting up Nexus for the first time, set the admin (or whichever user you choose to use) password and log that user out.
 
 TODO:
 Everything below is outdated and must be updated
