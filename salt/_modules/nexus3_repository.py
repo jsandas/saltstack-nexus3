@@ -621,7 +621,7 @@ def delete(name):
     resp = nc.delete(delete_path)
 
     if resp['status'] == 404:
-        ret['comment'] = 'Repository {} not found.'.format(name)
+        ret['comment'] = 'Repository {} not present.'.format(name)
     elif resp['status'] != 204:
         ret['comment'] = 'Error deleting repository {}.'.format(name)
         ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])

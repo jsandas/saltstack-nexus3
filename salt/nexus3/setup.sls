@@ -47,6 +47,10 @@ create-yum-hosted:
     - strict_content_validation: True
 
 delete-yum-hosted:
+  nexus3_repository.absent:
+    - name: yum-hosted
+
+nonexistent-repo:
   nexus3_repository.absent
 
 # {% for role, data in nexus['roles'].items() %}

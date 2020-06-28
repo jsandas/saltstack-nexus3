@@ -45,19 +45,22 @@ def absent(name):
         ret['comment'] = ''
 
         if not metadata['repository']:            
-            ret['comment'] = 'Repository {} not found.'.format(name)
+            ret['comment'] = 'Repository {} not present.'.format(name)
         else:
             ret['comment'] = 'Repository {} will be deleted.'.format(name)
         return ret
 
-    resp = __salt__['nexus3_repository.delete'](name)
+    if not metadata['repository']:            
+        ret['comment'] = 'Repository {} not present.'.format(name)
+    else:
+        resp = __salt__['nexus3_repository.delete'](name)
 
-    if 'error' in resp.keys():
-        ret['result'] = False
-        ret['comment'] = resp['error']
-        return ret
-     
-    ret['changes'] = resp['comment']
+        if 'error' in resp.keys():
+            ret['result'] = False
+            ret['comment'] = resp['error']
+            return ret
+
+        ret['changes'] = resp
 
     return ret
 
