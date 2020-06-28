@@ -157,7 +157,7 @@ def configure(name,
 
     if __opts__['test']:
         ret['result'] = None
-        ret['comment'] = 'Email configuration will be change to {}.'.format(email)
+        ret['comment'] = 'Email configuration will change to {}.'.format(email)
         return ret
 
     configure_results = __salt__['nexus3_email.configure'](enabled,host,port,

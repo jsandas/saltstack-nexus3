@@ -18,6 +18,50 @@ import logging
 log = logging.getLogger(__name__)
 
 
+def absent(name):
+    '''
+    name (str):
+        name (str):
+            name of respository
+
+    .. code-block:: yaml
+
+        delete_repository:
+          nexus3_repositories.absent:
+            - name: test-yum
+    '''
+
+    ret = {
+        'name': name, 
+        'changes': {}, 
+        'result': True, 
+        'comment': ''
+    }
+
+    metadata = __salt__['nexus3_repository.describe'](name=name)
+
+    if __opts__['test']:
+        ret['result'] = None
+        ret['comment'] = ''
+
+        if not metadata['repository']:            
+            ret['comment'] = 'Repository {} not found.'.format(name)
+        else:
+            ret['comment'] = 'Repository {} will be deleted.'.format(name)
+        return ret
+
+    resp = __salt__['nexus3_repository.delete'](name)
+
+    if 'error' in resp.keys():
+        ret['result'] = False
+        ret['comment'] = resp['error']
+        return ret
+     
+    ret['changes'] = resp['comment']
+
+    return ret
+
+
 def present(name,
         repo_format,
         repo_type,
@@ -50,10 +94,8 @@ def present(name,
         **kwargs):
     '''
     name (str):
-        state id name
-        .. note::
-            do not provide this argument, this is only here
-            because salt passes this arg always
+        name (str):
+            name of respository
 
     repo_format (str):
         Format of repository [apt|bower|cocoapads|conan|docker|etc.]
@@ -180,7 +222,6 @@ def present(name,
         ret['result'] = None
         ret['comment'] = ''
 
-
         if not metadata['repository']:            
             ret['comment'] = 'Repository {} will be created. Type: {} Format: {}'.format(name, repo_type, repo_format)
         else:
@@ -188,30 +229,63 @@ def present(name,
         return ret
 
     if repo_type == 'group':
-        group_resp = __salt__['nexus3_repository.group'](name,
-                                            repo_format,
-                                            blobstore,
-                                            docker_force_auth,
-                                            docker_http_port,
-                                            docker_https_port,
-                                            docker_v1_enabled,
-                                            group_members,
-                                            strict_content_validation,
-                                            **kwargs)
+        resp = __salt__['nexus3_repository.group'](name,
+                                                repo_format,
+                                                blobstore,
+                                                docker_force_auth,
+                                                docker_http_port,
+                                                docker_https_port,
+                                                docker_v1_enabled,
+                                                group_members,
+                                                strict_content_validation,
+                                                **kwargs)
 
-        if 'error' in group_resp.keys():
-            ret['result'] = False
-            ret['comment'] = group_resp['error']
-            return ret
+    if repo_type == 'hosted':
+        resp = __salt__['nexus3_repository.hosted'](name,
+                                                repo_format,
+                                                apt_dist_name,
+                                                apt_gpg_passphrase,
+                                                apt_gpg_priv_key,
+                                                blobstore,
+                                                cleanup_policies,
+                                                docker_force_auth,
+                                                docker_http_port,
+                                                docker_https_port,
+                                                docker_v1_enabled,
+                                                maven_layout_policy,
+                                                maven_version_policy,
+                                                strict_content_validation,
+                                                yum_deploy_policy,
+                                                yum_repodata_depth,
+                                                write_policy,
+                                                **kwargs)
 
-        
-    # reset_results = __salt__['nexus3_repositories.r']()
+    if repo_type == 'proxy':
+        resp = __salt__['nexus3_repository.proxy'](name,
+                                                repo_format,
+                                                remote_url,
+                                                apt_dist_name,
+                                                apt_flat_repo,
+                                                blobstore,
+                                                bower_rewrite_urls,
+                                                cleanup_policies,
+                                                content_max_age,
+                                                docker_index_type,
+                                                docker_index_url,
+                                                maven_layout_policy,
+                                                maven_version_policy,
+                                                metadata_max_age,
+                                                nuget_cache_max_age,
+                                                remote_password,
+                                                remote_username,
+                                                strict_content_validation,
+                                                **kwargs)
 
-    # if 'error' in reset_results.keys():
-    #     ret['result'] = False
-    #     ret['comment'] = reset_results['error']
-    #     return ret        
-
-    # ret['changes'] = reset_results
+    if 'error' in resp.keys():
+        ret['result'] = False
+        ret['comment'] = resp['error']
+        return ret
+     
+    ret['changes'] = resp['repository']
 
     return ret
