@@ -53,9 +53,20 @@ delete-yum-hosted:
 nonexistent-repo:
   nexus3_repository.absent
 
-set_anonymous_access:
+set_anonymous_access_false:
+  nexus3_security.anonymous_access:
+    - enabled: False
+
+set_anonymous_access_true:
   nexus3_security.anonymous_access:
     - enabled: True
+
+update_realms:
+  nexus3_security.realms:
+    - realms: 
+      - NexusAuthenticatingRealm
+      - NexusAuthorizingRealm
+      - DockerToken
 
 # {% for role, data in nexus['roles'].items() %}
 # {{ role }}:
