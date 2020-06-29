@@ -53,6 +53,10 @@ delete-yum-hosted:
 nonexistent-repo:
   nexus3_repository.absent
 
+set_anonymous_access:
+  nexus3_security.anonymous_access:
+    - enabled: True
+
 # {% for role, data in nexus['roles'].items() %}
 # {{ role }}:
 #   nexus3.role:
@@ -72,10 +76,6 @@ nonexistent-repo:
 #     - password: 'testing123'
 #     - base_roles:
 #       - repo-user
-
-# enable_anonymous_access:
-#   nexus3.allow_anonymous_access:
-#     - enable: True
 
 # http://localhost:8081:
 #   nexus3.base_url
