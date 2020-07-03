@@ -68,6 +68,19 @@ update_realms:
       - NexusAuthorizingRealm
       - DockerToken
 
+create_privilege:
+  nexus3_privileges.present:
+    - name: testing1
+    - actions: ['ALL']
+    - description: 'Test repo admin'
+    - format: maven2
+    - repository: '*'
+    - privilege_type: repository-admin
+
+delete_privilege:
+  nexus3_privileges.absent:
+    - name: testing1
+
 # {% for role, data in nexus['roles'].items() %}
 # {{ role }}:
 #   nexus3.role:
