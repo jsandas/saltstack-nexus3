@@ -54,7 +54,7 @@ def describe():
     return ret
 
 
-def update(enabled):
+def enable(enabled):
     '''
     enabled (bool):
         enable or disable anonymous access [True|False]
@@ -63,7 +63,7 @@ def update(enabled):
 
     .. code-block:: bash
 
-        salt myminion nexus3_anonymous_access.update enabled=True
+        salt myminion nexus3_anonymous_access.enable True
     '''
 
     ret = {
