@@ -12,7 +12,7 @@ def test_describe_anonymous_access():
 
 
 def test_update_anonymous_access():
-    ret = client.cmd('test.minion', 'nexus3_anonymous_access.update', ['enabled=True'])
+    ret = client.cmd('test.minion', 'nexus3_anonymous_access.enable', ['enabled=True'])
     print(ret)
     assert ret['test.minion']['anonymous_access'] != {},'anonymous_access is empty'
     assert ret['test.minion']['anonymous_access']['enabled'] == True,'anonymous_access should be enabled'
