@@ -1,22 +1,22 @@
 {% from tpldir + "/map.jinja" import nexus with context %}
 
 burgers_create:
-  nexus3_blobstore.present:
+  nexus3_blobstores.present:
     - name: burgers
 
 burgers_update:
-  nexus3_blobstore.present:
+  nexus3_blobstores.present:
     - name: burgers
     - quota_type: spaceRemainingQuota
     - quota_limit: 5000000
 
 burgers_delete:
-  nexus3_blobstore.absent:
+  nexus3_blobstores.absent:
     - name: burgers
 
 # should not exist
 delete_test_blobstore:
-  nexus3_blobstore.absent:
+  nexus3_blobstores.absent:
     - name: test
 
 setup_email:
@@ -31,14 +31,14 @@ clear_email:
   nexus3_email.clear
   
 yum-proxy:
-  nexus3_repository.present:
+  nexus3_repositories.present:
     - repo_format: yum
     - repo_type: proxy
     - remote_url: http://mirror.centos.org/centos/7/os/x86_64/
     - content_max_age: 3600
 
 create-yum-hosted:
-  nexus3_repository.present:
+  nexus3_repositories.present:
     - name: yum-hosted
     - repo_format: yum
     - repo_type: hosted
@@ -47,11 +47,11 @@ create-yum-hosted:
     - strict_content_validation: True
 
 delete-yum-hosted:
-  nexus3_repository.absent:
+  nexus3_repositories.absent:
     - name: yum-hosted
 
 nonexistent-repo:
-  nexus3_repository.absent
+  nexus3_repositories.absent
 
 set_anonymous_access_false:
   nexus3_security.anonymous_access:
@@ -81,6 +81,20 @@ delete_privilege:
   nexus3_privileges.absent:
     - name: testing1
 
+create_role:
+  nexus3_roles.present:
+    - name: testing1
+    - description: 'test role'
+    - privileges: ['nx-repository-view-*-*-read']
+    - roles: ['nx-anonymous']
+
+update_role:
+  nexus3_roles.present:
+    - name: testing1
+    - description: 'test role update'
+    - privileges: ['nx-repository-view-*-*-read']
+    - roles: ['nx-anonymous']
+    
 # {% for role, data in nexus['roles'].items() %}
 # {{ role }}:
 #   nexus3.role:
