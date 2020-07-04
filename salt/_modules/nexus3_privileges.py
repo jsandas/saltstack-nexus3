@@ -95,34 +95,34 @@ def create(name,
     path = privileges_beta_path + '/' + privilege_type
 
     payload = {
-        "name": name,
-        "description": description,
-        "actions": actions,
+        'name': name,
+        'description': description,
+        'actions': actions,
     }
 
     application = {
-        "domain": domain
+        'domain': domain
     }
 
     repository = {
-        "format": format,
-        "repository": repository
+        'format': format,
+        'repository': repository
     }
 
     repository_content_selector = {
-        "format": format,
-        "repository": repository,
-        "contentSelector": contentSelector
+        'format': format,
+        'repository': repository,
+        'contentSelector': contentSelector
     }
 
     script = {
-        "scriptName": scriptName
+        'scriptName': scriptName
     }
 
     wildcard = {
-        "name": name,
-        "description": description,
-        "pattern": pattern
+        'name': name,
+        'description': description,
+        'pattern': pattern
     }
 
     if privilege_type == 'application':
