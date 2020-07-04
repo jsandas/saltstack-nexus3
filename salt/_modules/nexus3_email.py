@@ -118,7 +118,10 @@ def configure(enabled,
 
     if resp['status'] != 204:
         ret['comment'] = 'Failed to retrieve emails settings.'
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
         return ret
     
     email_config = get()
@@ -170,7 +173,10 @@ def reset():
         ret['comment'] = 'Email settings reset'
     else:
         ret['comment'] = 'Failed to reset email settings'
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
 
     return ret
 
@@ -202,6 +208,9 @@ def verify(to):
             ret['error'] = status['reason']
     else:
         ret['comment'] = 'Failed to send email.'
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
 
     return ret   

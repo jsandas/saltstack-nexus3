@@ -49,7 +49,10 @@ def describe():
         ret['anonymous_access'] = json.loads(resp['body'])
     else:
         ret['comment'] = 'Failed to retrieve anonymous access settings.'
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
 
     return ret
 
@@ -89,6 +92,9 @@ def enable(enabled):
         ret['anonymous_access'] = json.loads(resp['body'])
     else:
         ret['comment'] = 'Failed to update anonymous access.'
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
 
     return ret

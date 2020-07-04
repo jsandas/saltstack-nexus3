@@ -110,7 +110,10 @@ def create(name,
         ret['blobstore'] = describe(name)['blobstore']
     else:
         ret['comment'] = 'Failed to create blobstore "{}".'.format(name)
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
 
 
     return ret
@@ -141,7 +144,10 @@ def delete(name):
         ret['comment'] = 'Blobstore "{}" does not exist.'.format(name)
     elif resp['status'] !=204 :
         ret['comment'] = 'Failed to delete blobstore "{}".'.format(name)
-        ret['error'] = '{} : {}'.format(resp['status'], resp['body'])
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
 
     return ret
 
@@ -198,7 +204,10 @@ def list_all():
         ret['blobstores'] = json.loads(resp['body'])
     else:
         ret['comment'] = 'Failed to retrieve blobstores "{}".'
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
 
     return ret
 
@@ -260,6 +269,9 @@ def update(name,
         ret['blobstore'] = describe(name)['blobstore']
     else:
         ret['comment'] = 'Failed to update blobstore "{}".'.format(name)
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
 
     return ret

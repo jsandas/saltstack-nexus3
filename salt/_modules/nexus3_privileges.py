@@ -164,7 +164,10 @@ def create(name,
         ret['privilege'] = describe(name)['privilege']
     else:
         ret['comment'] = 'Failed to create privilege.'
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
 
     return ret
     
@@ -193,7 +196,10 @@ def delete(name):
         ret['comment'] = 'Deleted privilege {}.'.format(name)
     else:
         ret['comment'] = 'Failed to delete privilege.'
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
 
     return ret
 
@@ -223,7 +229,10 @@ def describe(name):
         ret['privilege'] = json.loads(resp['body'])
     else:
         ret['comment'] = 'Failed to retrieve privilege {}.'.format(name)
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
 
     return ret
 
@@ -250,7 +259,10 @@ def list_all():
         ret['privileges'] = json.loads(resp['body'])
     else:
         ret['comment'] = 'Failed to retrieve available privileges.'
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
 
     return ret
 
@@ -357,6 +369,9 @@ def update(name,
         ret['privilege'] = describe(name)['privilege']
     else:
         ret['comment'] = 'Failed to update privilege.'
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
 
     return ret

@@ -163,7 +163,10 @@ def group(name,
         else:
             ret['comment'] = 'Failed to create repository {}.'.format(name)
 
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
 
     return ret
 
@@ -362,7 +365,10 @@ def hosted(name,
         else:
             ret['comment'] = 'Failed to create repository {}.'.format(name)
 
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
 
     return ret
 
@@ -594,7 +600,10 @@ def proxy(name,
         else:
             ret['comment'] = 'Failed to create repository {}.'.format(name)
 
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
 
     return ret
 
@@ -624,7 +633,10 @@ def delete(name):
         ret['comment'] = 'Repository {} not present.'.format(name)
     elif resp['status'] != 204:
         ret['comment'] = 'Error deleting repository {}.'.format(name)
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
 
     return ret
 
@@ -650,7 +662,10 @@ def describe(name):
 
     if resp['status'] != 200:
         ret['comment'] = 'Error restrieving repository information for {}.'.format(name)
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
         return ret
 
     repo_dict = json.loads(resp['body'])
@@ -680,7 +695,10 @@ def list_all():
 
     if resp['status'] != 200:
         ret['comment'] = 'Error retrieving repositories.'
-        ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
         return ret
     
     ret['repositories'] = resp['body']
