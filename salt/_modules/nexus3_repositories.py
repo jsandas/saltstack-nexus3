@@ -1,5 +1,5 @@
 ''''
-execution module for the Nexus 3 respositories
+execution module for the Nexus 3 repositories
 
 :configuration: In order to connect to Nexus 3, certain configuration is required
     in /etc/salt/minion on the relevant minions otherwise defaults are used. A sample dictionary might look
@@ -149,11 +149,11 @@ def group(name,
     if update:
         update_path = repo_beta_path + '/' + repo_format + '/group/' + name
         resp = nc.put(update_path, payload)
-        ret['comment'] = 'Updated respository {}.'.format(name)
+        ret['comment'] = 'Updated repository {}.'.format(name)
     else:
         create_path = repo_beta_path + '/' + repo_format + '/group'
         resp = nc.post(create_path, payload)
-        ret['comment'] = 'Created respository {}.'.format(name)
+        ret['comment'] = 'Created repository {}.'.format(name)
 
     if resp['status'] == 201 or resp['status'] == 204:
         ret['repository'] = describe(name)['repository']
@@ -351,11 +351,11 @@ def hosted(name,
     if update:
         update_path = repo_beta_path + '/' + repo_format + '/hosted/' + name
         resp = nc.put(update_path, payload)
-        ret['comment'] = 'Updated respository {}.'.format(name)
+        ret['comment'] = 'Updated repository {}.'.format(name)
     else:
         create_path = repo_beta_path + '/' + repo_format + '/hosted'
         resp = nc.post(create_path, payload)
-        ret['comment'] = 'Created respository {}.'.format(name)
+        ret['comment'] = 'Created repository {}.'.format(name)
 
     if resp['status'] == 201 or resp['status'] == 204:
         ret['repository'] = describe(name)['repository']
@@ -586,11 +586,11 @@ def proxy(name,
     if update:
         update_path = repo_beta_path + '/' + repo_format + '/proxy/' + name
         resp = nc.put(update_path, payload)
-        ret['comment'] = 'Updated respository {}.'.format(name)
+        ret['comment'] = 'Updated repository {}.'.format(name)
     else:
         create_path = repo_beta_path + '/' + repo_format + '/proxy'
         resp = nc.post(create_path, payload)
-        ret['comment'] = 'Created respository {}.'.format(name)
+        ret['comment'] = 'Created repository {}.'.format(name)
 
     if resp['status'] == 201 or resp['status'] == 204:
         ret['repository'] = describe(name)['repository']
