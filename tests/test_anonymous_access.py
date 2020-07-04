@@ -19,7 +19,7 @@ def test_update_anonymous_access():
 
 
 # clean the slate
-client.cmd('test.minion', 'nexus3_anonymous_access.update', ['enabled=False'])
+client.cmd('test.minion', 'nexus3_anonymous_access.enable', ['enabled=False'])
 
 test_describe_anonymous_access()
 
