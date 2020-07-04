@@ -38,7 +38,7 @@ def absent(name):
         'comment': ''
     }
 
-    metadata = __salt__['nexus3_repository.describe'](name=name)
+    metadata = __salt__['nexus3_repositories.describe'](name=name)
 
     if __opts__['test']:
         ret['result'] = None
@@ -53,7 +53,7 @@ def absent(name):
     if not metadata['repository']:            
         ret['comment'] = 'Repository {} not present.'.format(name)
     else:
-        resp = __salt__['nexus3_repository.delete'](name)
+        resp = __salt__['nexus3_repositories.delete'](name)
 
         if 'error' in resp.keys():
             ret['result'] = False
@@ -219,7 +219,7 @@ def present(name,
         'comment': ''
     }
 
-    metadata = __salt__['nexus3_repository.describe'](name=name)
+    metadata = __salt__['nexus3_repositories.describe'](name=name)
 
     if __opts__['test']:
         ret['result'] = None
@@ -232,7 +232,7 @@ def present(name,
         return ret
 
     if repo_type == 'group':
-        resp = __salt__['nexus3_repository.group'](name,
+        resp = __salt__['nexus3_repositories.group'](name,
                                                 repo_format,
                                                 blobstore,
                                                 docker_force_auth,
@@ -244,7 +244,7 @@ def present(name,
                                                 **kwargs)
 
     if repo_type == 'hosted':
-        resp = __salt__['nexus3_repository.hosted'](name,
+        resp = __salt__['nexus3_repositories.hosted'](name,
                                                 repo_format,
                                                 apt_dist_name,
                                                 apt_gpg_passphrase,
@@ -264,7 +264,7 @@ def present(name,
                                                 **kwargs)
 
     if repo_type == 'proxy':
-        resp = __salt__['nexus3_repository.proxy'](name,
+        resp = __salt__['nexus3_repositories.proxy'](name,
                                                 repo_format,
                                                 remote_url,
                                                 apt_dist_name,

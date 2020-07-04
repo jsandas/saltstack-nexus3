@@ -1,5 +1,5 @@
 ''''
-stage module for Nexus 3 security settings
+stage module for Nexus 3 privileges
 
 :configuration: In order to connect to Nexus 3, certain configuration is required
     in /etc/salt/minion on the relevant minions otherwise defaults are used. A sample dictionary might look

@@ -75,8 +75,8 @@ def create(name,
 
     .. code-block:: bash
 
-        salt myminion nexus3_blobstore.create name=myblobstore
-        salt myminion nexus3_blobstore.create name=myblobstore quota_type=spaceRemainingQuota spaceRemainingQuota=5000000
+        salt myminion nexus3_blobstores.create name=myblobstore
+        salt myminion nexus3_blobstores.create name=myblobstore quota_type=spaceRemainingQuota spaceRemainingQuota=5000000
     '''
 
     ret = {
@@ -128,7 +128,7 @@ def delete(name):
 
     .. code-block:: bash
 
-        salt myminion nexus3_blobstore.delete name=myblobstore
+        salt myminion nexus3_blobstores.delete name=myblobstore
     '''
 
     ret = {
@@ -161,7 +161,7 @@ def describe(name):
 
     .. code-block:: bash
 
-        salt myminion nexus3_blobstore.describe name=myblobstore
+        salt myminion nexus3_blobstores.describe name=myblobstore
     '''
 
     ret = {
@@ -190,7 +190,7 @@ def list_all():
 
     .. code-block:: bash
 
-        salt myminion nexus3_blobstore.list_all
+        salt myminion nexus3_blobstores.list_all
     '''
 
     ret = {
@@ -237,7 +237,7 @@ def update(name,
 
     .. code-block:: bash
 
-        salt myminion nexus3_blobstore.create name=myblobstore quota_type=spaceRemainingQuota quota_limit=5000000
+        salt myminion nexus3_blobstores.create name=myblobstore quota_type=spaceRemainingQuota quota_limit=5000000
     '''
 
     ret = {
