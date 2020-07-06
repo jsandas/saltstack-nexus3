@@ -2,13 +2,13 @@
 execution module for Nexus 3 security realms
 
 :configuration: In order to connect to Nexus 3, certain configuration is required
-    in /etc/salt/minion on the relevant minions otherwise defaults are used. A sample dictionary might look
-    like:
-    
-        nexus3:
-          host: '127.0.0.1:8081'
-          user: 'admin'
-          pass: 'admin123'
+    in /etc/salt/minion on the relevant minions.
+
+    Example:
+      nexus3:
+        host: '127.0.0.1:8081'
+        user: 'admin'
+        pass: 'admin123'
 
 '''
 

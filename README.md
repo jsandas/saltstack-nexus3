@@ -15,12 +15,13 @@ The nexus3 state module depends on python requests library which should already 
 Configuration:
 In order to connect to Nexus 3, credentials can be provided through the minion configuration in yaml format:
 
-    nexus3:
-      host: '127.0.0.1:8081'
-      user: 'admin'
-      pass: 'admin123'
+    Example:
+      nexus3:
+        host: '127.0.0.1:8081'
+        user: 'admin'
+        pass: 'admin123'
 
-If no credentials are provided in the minion configuration file.  If setting up Nexus for the first time, set the admin (or whichever user you choose to use) password and log that user out.
+If setting up Nexus for the first time, set the admin (or whichever user you choose to use) password and log that user out.
 
 TODO:
 Everything below is outdated and must be updated
