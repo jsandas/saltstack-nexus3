@@ -1,5 +1,5 @@
 ''''
-stage module for Nexus 3 roles
+stage module for Nexus 3 users
 
 :configuration: In order to connect to Nexus 3, certain configuration is required
     in /etc/salt/minion on the relevant minions.
@@ -26,7 +26,7 @@ def absent(name):
     .. code-block:: yaml
 
         testing1:
-          nexus3_roles.absent
+          nexus3_users.absent
     '''
 
     ret = {
@@ -38,25 +38,25 @@ def absent(name):
 
     exists = True
 
-    meta = __salt__['nexus3_roles.describe'](name)
+    meta = __salt__['nexus3_users.describe'](name)
     
-    if not meta['roles']:
+    if not meta['users']:
         exists = False
 
     if exists:
         if __opts__['test']:
             ret['result'] = None
-            ret['comment'] = 'role {} will be deleted.'.format(name)
+            ret['comment'] = 'user {} will be deleted.'.format(name)
             return ret
 
-        resp = __salt__['nexus3_roles.delete'](name)
+        resp = __salt__['nexus3_users.delete'](name)
         if 'error' in resp.keys():
             ret['result'] = False
             ret['comment'] = meta['error']
         else:
             ret['changes'] = resp
     else:
-        ret['comment'] = 'role {} does not exist'.format(name)
+        ret['comment'] = 'user {} is not present'.format(name)
 
     return ret
 
@@ -64,33 +64,55 @@ def absent(name):
 # Dev Note: there may be a better way of handling create/update
 # without requiring input for each argument
 def present(name,
-        description,
-        privileges,
-        roles):
+            password,
+            emailAddress,
+            firstName,
+            lastName,
+            roles=['nx-anonymous'],
+            status='active'):
     '''
     name (str):
-        name of role
+        name of user
     
-    description (str):
-        description of role
+    password (str):
+        password of user
 
-    privileges (list):
-        list of privileges
-        .. note::
-            requires at least an empty list
+    emailAddress (str):
+        email address
 
+    firstName (str):
+        first name
+
+    lastName (str):
+        last name
+    
     roles (list):
-        roles to inherit from
-        .. note::
-            requires at least an empty list
+        list of roles (Default: ['nx-anonymous'])
+
+    status (str):
+        user status [active|disabled] (Default: active)
 
     .. code-block:: yaml
 
-        create_role:
-          nexus3_roles.present:
+        create_user:
+          nexus3_users.present:
             - name: test_role 
-            - description: 'test role'
+            - password: abc123
+            - emailAddress: test@email.com
+            - firstName: Test
+            - lastName: User
             - roles: ['nx-admin']
+
+        create_user:
+          nexus3_users.present:
+            - name: test_role 
+            - password: abc123
+            - emailAddress: test@email.com
+            - firstName: Test
+            - lastName: User
+            - roles: ['nx-admin']
+            - status: disabled
+
     '''
 
     ret = {
@@ -102,19 +124,19 @@ def present(name,
 
     exists = True
     # get value of realms
-    meta = __salt__['nexus3_roles.describe'](name)
+    meta = __salt__['nexus3_users.describe'](name)
 
-    if meta['roles'] == {}:
+    if meta['users'] == {}:
         exists = False
 
     if not exists:
 
         if __opts__['test']:
             ret['result'] = None
-            ret['comment'] = 'role {} will be created.'.format(name)
+            ret['comment'] = 'user {} will be created.'.format(name)
             return ret
 
-        create_results = __salt__['nexus3_roles.create'](name,description,privileges,roles)
+        create_results = __salt__['nexus3_users.create'](name,password,emailAddress,firstName,lastName,roles,status)
 
         if 'error' in create_results.keys():
             ret['result'] = False
@@ -129,11 +151,12 @@ def present(name,
             ret['comment'] = 'role {} will be updated.'.format(name)
             return ret
         
-        update_results = __salt__['nexus3_roles.update'](name,description,privileges,roles)
+        update_results = __salt__['nexus3_users.update'](name,emailAddress,firstName,lastName,roles,status)
+        update_pw_results = __salt__['nexus3_users.set_password'](name,password)
 
-        if 'error' in update_results.keys():
+        if 'error' in update_results.keys() or 'error' in update_pw_results.keys():
             ret['result'] = False
-            ret['comment'] = update_results['error']
+            ret['comment'] = update_results['error'] or update_pw_results['error']
             return ret        
 
         ret['changes'] = update_results

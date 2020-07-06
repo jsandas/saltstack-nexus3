@@ -94,7 +94,26 @@ update_role:
     - description: 'test role update'
     - privileges: ['nx-repository-view-*-*-read']
     - roles: ['nx-anonymous']
-    
+
+create_user1:
+  nexus3_users.present:
+    - name: test_user1 
+    - password: abc123
+    - emailAddress: test@email.com
+    - firstName: Test1
+    - lastName: User
+    - roles: ['nx-admin']
+
+create_user2:
+  nexus3_users.present:
+    - name: test_user2
+    - password: abc123
+    - emailAddress: test@email.com
+    - firstName: Test2
+    - lastName: User
+    - roles: ['testing1']
+
+
 # {% for role, data in nexus['roles'].items() %}
 # {{ role }}:
 #   nexus3.role:

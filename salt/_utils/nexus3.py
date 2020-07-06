@@ -168,3 +168,29 @@ class NexusClient:
             ret['body'] = e
 
         return ret
+
+    def put_str(self, path, payload):
+        '''
+        put string payload to Nexus server
+        added because verify_email requires sending 
+        just a string, not json
+        '''
+        put_path = '{}/{}'.format(self.base_url, path)
+
+        headers = {'Content-type': 'text/plain'}
+
+        ret = {
+            'status': -1,
+            'body': {}
+        }
+
+        try:
+            resp = requests.put(put_path, auth=(self.username, self.password), headers=headers, data=payload)
+            log.debug('NexusClient Request: {} {}'.format(put_path, resp.status_code))
+            ret['status'] = resp.status_code
+            ret['body'] = resp.content
+        except Exception as e:
+            log.error('NexusClient Request failed: {}'.format(e))
+            ret['body'] = e
+
+        return ret
