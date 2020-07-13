@@ -100,17 +100,17 @@ def present(name,
     s3_bucket (str):
         Name of S3 bucket (Default: '')
         .. note::
-            S3 blobstores are currently untested.
+            S3 blobstores are currently not implemented.
 
     s3_access_key_id (str):
         AWS Access Key for S3 bucket (Default: '')
         .. note::
-            S3 blobstores are currently untested.
+            S3 blobstores are currently not implemented.
 
     s3_secret_access_key (str):
         AWS Secret Access Key for S3 bucket (Default: '')
         .. note::
-            S3 blobstores are currently untested.
+            S3 blobstores are currently not implemented.
 
 
     .. code-block:: yaml
