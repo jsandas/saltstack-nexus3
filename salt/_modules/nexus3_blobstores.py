@@ -93,7 +93,7 @@ def create(name,
     if quota_type is not None:
         payload['softQuota'] = {
             'type': quota_type,
-            'size': quota_limit
+            'limit': quota_limit
         }
 
     nc = nexus3.NexusClient()
