@@ -113,31 +113,54 @@ create_user2:
     - lastName: User
     - roles: ['testing1']
 
+# states based on pillar data
+{% for blobstore, data in nexus['blobstores'].items() %}
+create_blobstore_{{ blobstore }}:
+  nexus3_blobstores.present:
+    - name: {{ blobstore }}
+  {% for item in data %}
+    - {{ item }}
+  {% endfor %}
+{% endfor %}
 
-# {% for role, data in nexus['roles'].items() %}
-# {{ role }}:
-#   nexus3.role:
-#     - description: '{{ data.description }}'
-#     - privileges:
-#       - nx-repository-view-*-*-read
-#     - base_roles: 
-#       - {{ data.base_roles }}
-# {% endfor %}
+{% for privilege, data in nexus['privileges'].items() %}
+create_privilege_{{ privilege }}:
+  nexus3_privileges.present:
+    - name: {{ privilege }}
+  {% for item in data %}
+    - {{ item }}
+  {% endfor %}
+{% endfor %}
 
-# test_user:
-#   nexus3.user:
-#     - name: joe.job
-#     - first_name: joe
-#     - last_name: bob
-#     - email: test@nowhere.com
-#     - password: 'testing123'
-#     - base_roles:
-#       - repo-user
+{% for repository, data in nexus['repositories'].items() %}
+repositories_{{ repository }}:
+  nexus3_repositories.present:
+    - name: {{ repository }}
+  {% for item in data %}
+    - {{ item }}
+  {% endfor %}
+{% endfor %}
+
+{% for role, data in nexus['roles'].items() %}
+role_{{ role }}:
+  nexus3_roles.present:
+    - name: {{ role }}
+  {% for item in data %}
+    - {{ item }}
+  {% endfor %}
+{% endfor %}
+
+{% for user, data in nexus['users'].items() %}
+user_{{ user }}:
+  nexus3_users.present:
+    - name: {{ user }}
+  {% for item in data %}
+    - {{ item }}
+  {% endfor %}
+{% endfor %}
 
 # http://localhost:8081:
 #   nexus3.base_url
-
-
 
 # docker-test:
 #   nexus3.repo_proxy:

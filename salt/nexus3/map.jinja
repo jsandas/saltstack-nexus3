@@ -3,6 +3,9 @@
   'image_version':  'latest',
   'data_dir':       '/data/nexus',
   'user_id':        '200',
+  'blobstores':     salt['pillar.get']('nexus:blobstores',''),
+  'privileges':     salt['pillar.get']('nexus:privileges',''),
+  'repositories':   salt['pillar.get']('nexus:repositories',''),
   'roles':          salt['pillar.get']('nexus:roles',''),
   'users':          salt['pillar.get']('nexus:users',''),
   'tasks':          salt['pillar.get']('nexus:tasks','')
