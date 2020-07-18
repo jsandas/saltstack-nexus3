@@ -158,12 +158,13 @@ def present(name,
 
     if exists:
         update = False
+        updates = {}
 
         if meta['privilege']['description'] != description:
-            meta['privilege']['description'] = description
+            updates['description'] = description
             update = True
         if meta['privilege']['actions'] != actions:
-            meta['privilege']['actions'] = actions
+            updates['actions'] = actions
             update = True
 
         if type == 'application':
@@ -171,7 +172,7 @@ def present(name,
                 ret['comment'] = 'domain cannot be None for type {}'.format(type)
                 return ret
             if meta['privilege']['domain'] != domain:
-                meta['privilege']['domain'] = domain
+                updates['domain'] = domain
                 update = True
 
         if type in ['repository-admin','repository-view']:
@@ -179,10 +180,10 @@ def present(name,
                 ret['comment'] = 'format and repository cannot be None for type {}'.format(type)
                 return ret
             if meta['privilege']['format'] != format:
-                meta['privilege']['format'] = format
+                updates['format'] = format
                 update = True
             if meta['privilege']['repository'] != repository:
-                meta['privilege']['repository'] = repository
+                updates['repository'] = repository
                 update = True
 
         if type == 'repository-content-selector':
@@ -190,13 +191,13 @@ def present(name,
                 ret['comment'] = 'format, contentSelector, and repository cannot be None for type {}'.format(type)
                 return ret
             if meta['privilege']['format'] != format:
-                meta['privilege']['format'] = format
+                updates['format'] = format
                 update = True
             if meta['privilege']['repository'] != repository:
-                meta['privilege']['repository'] = repository
+                updates['repository'] = repository
                 update = True
             if meta['privilege']['contentSelector'] != contentSelector:
-                meta['privilege']['contentSelector'] = contentSelector
+                updates['contentSelector'] = contentSelector
                 update = True
 
         if type == 'scripts':
@@ -204,7 +205,7 @@ def present(name,
                 ret['comment'] = 'scriptName cannot be None for type {}'.format(type)
                 return ret
             if meta['privilege']['scriptName'] != scriptName:
-                meta['privilege']['scriptName'] = scriptName
+                updates['scriptName'] = scriptName
                 update = True
 
         if type == 'wildcard':
@@ -212,7 +213,7 @@ def present(name,
                 ret['comment'] = 'pattern cannot be None for type {}'.format(type)
                 return ret
             if meta['privilege']['pattern'] != pattern:
-                meta['pattern'] = pattern
+                updates['pattern'] = pattern
                 update = True
 
         if __opts__['test']:
@@ -220,7 +221,7 @@ def present(name,
 
             if update:
                 ret['comment'] = 'privilege {} will be updated.'.format(name)
-                ret['changes'] = meta
+                ret['changes'] = updates
             else:
                 ret['comment'] = 'privilege {} is in desired state.'.format(name)
             return ret
@@ -234,7 +235,7 @@ def present(name,
                 ret['comment'] = update_results['error']
                 return ret        
 
-            ret['changes'] = update_results
+            ret['changes'] = updates
         else:
             ret['comment'] = 'privilege {} is in desired state.'.format(name)
     return ret
