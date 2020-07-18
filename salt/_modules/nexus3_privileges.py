@@ -29,7 +29,7 @@ privileges_beta_path = 'beta/security/privileges'
 
 
 def create(name,
-        privilege_type,
+        type,
         actions=[],
         contentSelector=None,
         description='New Nexus privilege',
@@ -42,7 +42,7 @@ def create(name,
     name (str):
         privilege name
 
-    privilege_type (str):
+    type (str):
         privilege type [application|repository-admin|respository-content-selector|repository-view|script|wildcard]
 
     actions (list):
@@ -51,6 +51,7 @@ def create(name,
     contentSelector (str):
         name of content selector (Default: None
         .. note::
+            required for respository-content-selector privilege type
             content selector must exist before assigning privileges
 
     description (str):
@@ -83,16 +84,16 @@ def create(name,
 
     .. code-block:: bash
 
-        salt myminion nexus3_privileges.create name=nx-userschangepw actions="['ADD','READ']" description='Change password permission' domain=userschangepw privilege_type=application
+        salt myminion nexus3_privileges.create name=nx-userschangepw actions="['ADD','READ']" description='Change password permission' domain=userschangepw type=application
 
-        salt myminion nexus3_privileges.create name=nx-repository-view-nuget-nuget-hosted-browse actions=['BROWSE'] description='Browse privilege for nuget-hosted repository views' format=nuget repository=nuget-hosted privilege_type=repository-view
+        salt myminion nexus3_privileges.create name=nx-repository-view-nuget-nuget-hosted-browse actions=['BROWSE'] description='Browse privilege for nuget-hosted repository views' format=nuget repository=nuget-hosted type=repository-view
     '''
 
     ret = {
         'privilege': {}
     }
 
-    path = privileges_beta_path + '/' + privilege_type
+    path = privileges_beta_path + '/' + type
 
     payload = {
         'name': name,
@@ -125,33 +126,33 @@ def create(name,
         'pattern': pattern
     }
 
-    if privilege_type == 'application':
+    if type == 'application':
         if domain is None:
-            ret['comment'] = 'domain cannot be None for privilege_type {}'.format(privilege_type)
+            ret['comment'] = 'domain cannot be None for type {}'.format(type)
             return ret
         payload.update(application)
 
-    if privilege_type in ['repository-admin','repository-view']:
+    if type in ['repository-admin','repository-view']:
         if format is None or repository is None:
-            ret['comment'] = 'format and repository cannot be None for privilege_type {}'.format(privilege_type)
+            ret['comment'] = 'format and repository cannot be None for type {}'.format(type)
             return ret
         payload.update(repository)
 
-    if privilege_type == 'repository-content-selector':
+    if type == 'repository-content-selector':
         if format is None or repository is None or contentSelector is None:
-            ret['comment'] = 'format, contentSelector, and repository cannot be None for privilege_type {}'.format(privilege_type)
+            ret['comment'] = 'format, contentSelector, and repository cannot be None for type {}'.format(type)
             return ret
         payload.update(repository_content_selector)   
 
-    if privilege_type == 'scripts':
+    if type == 'scripts':
         if script is None:
-            ret['comment'] = 'scriptName cannot be None for privilege_type {}'.format(privilege_type)
+            ret['comment'] = 'scriptName cannot be None for type {}'.format(type)
             return ret
         payload.update(script)
 
-    if privilege_type == 'wildcard':
+    if type == 'wildcard':
         if pattern is None:
-            ret['comment'] = 'pattern cannot be None for privilege_type {}'.format(privilege_type)
+            ret['comment'] = 'pattern cannot be None for type {}'.format(type)
             return ret
         payload = wildcard
 
@@ -160,10 +161,10 @@ def create(name,
     resp = nc.post(path, payload)
 
     if resp['status'] == 201:
-        ret['comment'] = 'Created privilege {}.'.format(name)
+        ret['comment'] = 'privilege {} created.'.format(name)
         ret['privilege'] = describe(name)['privilege']
     else:
-        ret['comment'] = 'Failed to create privilege.'
+        ret['comment'] = 'could not create privilege {}.'.format(name)
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
@@ -193,9 +194,9 @@ def delete(name):
     resp = nc.delete(path)
 
     if resp['status'] == 204:
-        ret['comment'] = 'Deleted privilege {}.'.format(name)
+        ret['comment'] = 'privilege {} delete.'.format(name)
     else:
-        ret['comment'] = 'Failed to delete privilege.'
+        ret['comment'] = 'could not delete privilege {}.'.format(name)
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
@@ -228,7 +229,7 @@ def describe(name):
     if resp['status'] == 200:
         ret['privilege'] = json.loads(resp['body'])
     else:
-        ret['comment'] = 'Failed to retrieve privilege {}.'.format(name)
+        ret['comment'] = 'could not retrieve privilege {}.'.format(name)
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
@@ -258,7 +259,7 @@ def list_all():
     if resp['status'] == 200:
         ret['privileges'] = json.loads(resp['body'])
     else:
-        ret['comment'] = 'Failed to retrieve available privileges.'
+        ret['comment'] = 'could not retrieve available privileges.'
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
@@ -318,7 +319,7 @@ def update(name,
 
     .. code-block:: bash
 
-        salt myminion nexus3_privileges.update name=testing actions="['ADD','READ']" description='Change password permission' domain=userschangepw privilege_type=application
+        salt myminion nexus3_privileges.update name=testing actions="['ADD','READ']" description='Change password permission' domain=userschangepw type=application
     '''
 
     ret = {
@@ -328,7 +329,7 @@ def update(name,
     priv_description = describe(name)
 
     if 'error' in priv_description.keys():
-        ret['comment'] = 'Failed to update privilege.'
+        ret['comment'] = 'failed to update privilege.'
         ret['error'] = priv_description['error']
         return ret
 
@@ -365,10 +366,10 @@ def update(name,
     resp = nc.put(path, meta)
 
     if resp['status'] == 204:
-        ret['comment'] = 'Updated privilege {}.'.format(name)
+        ret['comment'] = 'updated privilege {}.'.format(name)
         ret['privilege'] = describe(name)['privilege']
     else:
-        ret['comment'] = 'Failed to update privilege.'
+        ret['comment'] = 'could not update privilege {}.'.format(name)
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']

@@ -62,7 +62,7 @@ def absent(name):
 
 
 def present(name,
-            privilege_type,
+            type,
             actions=[],
             contentSelector=None,
             description='New Nexus privilege',
@@ -75,19 +75,20 @@ def present(name,
     name (str):
         privilege name
 
-    privilege_type (str):
+    type (str):
         privilege type [application|repository-admin|respository-content-selector|repository-view|script|wildcard]
 
     actions (list):
         list of actions [ADD|ALL|CREATE|DELETE|EDIT|READ|UPDATE] (Default: [])
 
     contentSelector (str):
-        name of content selector (Default: None
+        name of content selector (Default: None)
         .. note::
+            required for respository-content-selector privilege type
             content selector must exist before assigning privileges
 
     description (str):
-        description of privilge (Default: 'New Nexus privilege')
+        description of privilege (Default: 'New Nexus privilege')
 
     domain (str):
         domain of privilege [roles|scripts|search|selectors|settings|ssl-truststore|tasks|users|userschangepw] (Default: None)
@@ -121,7 +122,7 @@ def present(name,
             - description: 'Test repo admin'
             - format: maven2
             - repository: '*'
-            - privilege_type: repository-admin
+            - type: repository-admin
     '''
 
     ret = {
@@ -142,11 +143,11 @@ def present(name,
 
         if __opts__['test']:
             ret['result'] = None
-            ret['comment'] = 'Privilege {} will be created.'.format(name)
+            ret['comment'] = 'privilege {} will be created.'.format(name)
             return ret
 
-        create_results = __salt__['nexus3_privileges.create'](name,privilege_type,actions,
-                    contentSelector,description,domain,format,pattern,repository,scriptName)
+        create_results = __salt__['nexus3_privileges.create'](name, type, actions,
+                    contentSelector, description, domain, format, pattern, repository, scriptName)
 
         if 'error' in create_results.keys():
             ret['result'] = False
@@ -156,19 +157,84 @@ def present(name,
         ret['changes'] = create_results
 
     if exists:
+        update = False
+
+        if meta['privilege']['description'] != description:
+            meta['privilege']['description'] = description
+            update = True
+        if meta['privilege']['actions'] != actions:
+            meta['privilege']['actions'] = actions
+            update = True
+
+        if type == 'application':
+            if domain is None:
+                ret['comment'] = 'domain cannot be None for type {}'.format(type)
+                return ret
+            if meta['privilege']['domain'] != domain:
+                meta['privilege']['domain'] = domain
+                update = True
+
+        if type in ['repository-admin','repository-view']:
+            if format is None or repository is None:
+                ret['comment'] = 'format and repository cannot be None for type {}'.format(type)
+                return ret
+            if meta['privilege']['format'] != format:
+                meta['privilege']['format'] = format
+                update = True
+            if meta['privilege']['repository'] != repository:
+                meta['privilege']['repository'] = repository
+                update = True
+
+        if type == 'repository-content-selector':
+            if format is None or repository is None or contentSelector is None:
+                ret['comment'] = 'format, contentSelector, and repository cannot be None for type {}'.format(type)
+                return ret
+            if meta['privilege']['format'] != format:
+                meta['privilege']['format'] = format
+                update = True
+            if meta['privilege']['repository'] != repository:
+                meta['privilege']['repository'] = repository
+                update = True
+            if meta['privilege']['contentSelector'] != contentSelector:
+                meta['privilege']['contentSelector'] = contentSelector
+                update = True
+
+        if type == 'scripts':
+            if script is None:
+                ret['comment'] = 'scriptName cannot be None for type {}'.format(type)
+                return ret
+            if meta['privilege']['scriptName'] != scriptName:
+                meta['privilege']['scriptName'] = scriptName
+                update = True
+
+        if type == 'wildcard':
+            if pattern is None:
+                ret['comment'] = 'pattern cannot be None for type {}'.format(type)
+                return ret
+            if meta['privilege']['pattern'] != pattern:
+                meta['pattern'] = pattern
+                update = True
+
         if __opts__['test']:
             ret['result'] = None
-            ret['comment'] = 'Privilege {} will be updated.'.format(name)
+
+            if update:
+                ret['comment'] = 'privilege {} will be updated.'.format(name)
+                ret['changes'] = meta
+            else:
+                ret['comment'] = 'privilege {} is in desired state.'.format(name)
             return ret
         
-        update_results = __salt__['nexus3_privileges.update'](name,actions,
-                    contentSelector,description,domain,format,pattern,repository,scriptName)
+        if update:
+            update_results = __salt__['nexus3_privileges.update'](name, actions,
+                        contentSelector, description, domain, format, pattern, repository, scriptName)
 
-        if 'error' in update_results.keys():
-            ret['result'] = False
-            ret['comment'] = update_results['error']
-            return ret        
+            if 'error' in update_results.keys():
+                ret['result'] = False
+                ret['comment'] = update_results['error']
+                return ret        
 
-        ret['changes'] = update_results
-
+            ret['changes'] = update_results
+        else:
+            ret['comment'] = 'privilege {} is in desired state.'.format(name)
     return ret

@@ -5,7 +5,7 @@ import salt.client
 client = salt.client.LocalClient()
 
 def test_create_privileges():
-    ret = client.cmd('test.minion', 'nexus3_privileges.create', ["name=testing1", "actions=['ADD','READ']", "description='Change password permission'", "domain=userschangepw", "privilege_type=application"])
+    ret = client.cmd('test.minion', 'nexus3_privileges.create', ["name=testing1", "actions=['ADD','READ']", "description='Change password permission'", "domain=userschangepw", "type=application"])
     print(ret)
     assert ret['test.minion']['privilege'] != {},'privilege is empty'
     assert ret['test.minion']['privilege']['name'] == 'testing1','privilege name is incorrect'
@@ -13,7 +13,7 @@ def test_create_privileges():
     assert ret['test.minion']['privilege']['domain'] == 'userschangepw','privilege domain is incorrect'
     assert ret['test.minion']['privilege']['type'] == 'application','privilege privilege is incorrect'
 
-    ret = client.cmd('test.minion', 'nexus3_privileges.create', ["name=testing2", "actions=['ALL']", "description='Test repo admin'", "format=maven2", "repository=*", "privilege_type=repository-admin"])
+    ret = client.cmd('test.minion', 'nexus3_privileges.create', ["name=testing2", "actions=['ALL']", "description='Test repo admin'", "format=maven2", "repository=*", "type=repository-admin"])
     print(ret)
     assert ret['test.minion']['privilege'] != {},'privilege is empty'
     assert ret['test.minion']['privilege']['name'] == 'testing2','privilege name is incorrect'
