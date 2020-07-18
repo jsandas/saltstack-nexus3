@@ -61,8 +61,6 @@ def absent(name):
     return ret
 
 
-# Dev Note: there may be a better way of handling create/update
-# without requiring input for each argument
 def present(name,
         description,
         privileges,
@@ -104,11 +102,10 @@ def present(name,
     # get value of realms
     meta = __salt__['nexus3_roles.describe'](name)
 
-    if meta['roles'] == {}:
+    if meta['role'] == {}:
         exists = False
 
     if not exists:
-
         if __opts__['test']:
             ret['result'] = None
             ret['comment'] = 'role {} will be created.'.format(name)
@@ -124,10 +121,30 @@ def present(name,
         ret['changes'] = create_results
 
     if exists:
+        update = False
+        updates = {}
+
+        if meta['role']['description'] != description:
+            updates['description'] = description
+            update = True
+
+        if meta['role']['privileges'] != privileges:
+            updates['privileges'] = privileges
+            update = True
+
+        if meta['role']['roles'] != roles:
+            updates['roles'] = roles
+            update = True
+
         if __opts__['test']:
-            ret['result'] = None
-            ret['comment'] = 'role {} will be updated.'.format(name)
-            return ret
+
+            if update:
+                ret['result'] = None
+                ret['comment'] = 'role {} will be updated.'.format(name)
+                ret['changes'] = updates
+                return ret
+            else:
+                ret['comment'] = 'role {} is in desired state.'.format(name)
         
         update_results = __salt__['nexus3_roles.update'](name,description,privileges,roles)
 
@@ -136,6 +153,6 @@ def present(name,
             ret['comment'] = update_results['error']
             return ret        
 
-        ret['changes'] = update_results
+        ret['changes'] = updates
 
     return ret
