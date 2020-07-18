@@ -217,9 +217,8 @@ def present(name,
                 update = True
 
         if __opts__['test']:
-            ret['result'] = None
-
             if update:
+                ret['result'] = None
                 ret['comment'] = 'privilege {} will be updated.'.format(name)
                 ret['changes'] = updates
             else:
