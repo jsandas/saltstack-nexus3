@@ -11,7 +11,7 @@ nexus:
       - description: 'Test repo admin'
       - format: maven2
       - repository: '*'
-      - privilege_type: repository-admin
+      - type: repository-admin
   repositories:
     some-yum-repo:
       - repo_format: yum
