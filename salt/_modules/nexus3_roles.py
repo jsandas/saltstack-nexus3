@@ -53,7 +53,7 @@ def create(name,
     '''
 
     ret = {
-        'roles': {},
+        'role': {},
     }
 
     path = roles_beta_path
@@ -71,9 +71,9 @@ def create(name,
     resp = nc.post(path, payload)
 
     if resp['status'] == 200:
-        ret['roles'] = json.loads(resp['body'])
+        ret['role'] = json.loads(resp['body'])
     else:
-        ret['comment'] = 'Failed to create role.'
+        ret['comment'] = 'could not create role {}.'.format(name)
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
@@ -101,9 +101,9 @@ def delete(name):
     resp = nc.delete(path)
 
     if resp['status'] == 200:
-        ret['comment'] = 'Role {} deleted'.format(name)
+        ret['comment'] = 'role {} deleted'.format(name)
     else:
-        ret['comment'] = 'Failed to delete role.'
+        ret['comment'] = 'could not delete role {}.'.format(name)
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
@@ -125,7 +125,7 @@ def describe(name):
     '''
 
     ret = {
-        'roles': {},
+        'role': {},
     }
 
     path = roles_beta_path + '/' + name
@@ -134,9 +134,9 @@ def describe(name):
     resp = nc.get(path)
 
     if resp['status'] == 200:
-        ret['roles'] = json.loads(resp['body'])
+        ret['role'] = json.loads(resp['body'])
     else:
-        ret['comment'] = 'Failed to retrieve role.'
+        ret['comment'] = 'could not retrieve role {}.'.format(name)
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
@@ -166,7 +166,7 @@ def list_all():
     if resp['status'] == 200:
         ret['roles'] = json.loads(resp['body'])
     else:
-        ret['comment'] = 'Failed to retrieve roles.'
+        ret['comment'] = 'could not retrieve roles.'
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
@@ -200,10 +200,10 @@ def update(name,
     '''
 
     ret = {
-        'roles': {},
+        'role': {},
     }
 
-    meta = describe(name)['roles']
+    meta = describe(name)['role']
 
     path = roles_beta_path + '/' + name
 
@@ -220,9 +220,9 @@ def update(name,
     resp = nc.put(path, meta)
 
     if resp['status'] == 204:
-        ret['roles'] = describe(name)['roles']
+        ret['role'] = describe(name)['role']
     else:
-        ret['comment'] = 'Failed to update role.'
+        ret['comment'] = 'could not update role {}.'.format(name)
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body'],
