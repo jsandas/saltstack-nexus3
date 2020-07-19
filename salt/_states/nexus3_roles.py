@@ -102,6 +102,11 @@ def present(name,
     # get value of realms
     meta = __salt__['nexus3_roles.describe'](name)
 
+    if 'error' in meta.keys():
+        ret['result'] = False
+        ret['comment'] = meta['error']
+        return ret
+        
     if meta['role'] == {}:
         exists = False
 
@@ -140,8 +145,7 @@ def present(name,
 
             if is_update:
                 ret['result'] = None
-                ret['comment'] = 'role {} will be updated.'.format(name)
-                ret['changes'] = updates
+                ret['comment'] = 'role {} will be updated with: {}'.format(name, updates)
                 return ret
             else:
                 ret['comment'] = 'role {} is in desired state.'.format(name)
