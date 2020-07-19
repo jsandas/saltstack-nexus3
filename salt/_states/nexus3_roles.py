@@ -138,7 +138,7 @@ def present(name,
 
         if __opts__['test']:
 
-            if update:
+            if is_update:
                 ret['result'] = None
                 ret['comment'] = 'role {} will be updated.'.format(name)
                 ret['changes'] = updates
