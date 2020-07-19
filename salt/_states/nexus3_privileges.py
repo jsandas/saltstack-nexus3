@@ -157,15 +157,15 @@ def present(name,
         ret['changes'] = create_results
 
     if exists:
-        update = False
+        is_update = False
         updates = {}
 
         if meta['privilege']['description'] != description:
             updates['description'] = description
-            update = True
+            is_update = True
         if meta['privilege']['actions'] != actions:
             updates['actions'] = actions
-            update = True
+            is_update = True
 
         if type == 'application':
             if domain is None:
@@ -173,7 +173,7 @@ def present(name,
                 return ret
             if meta['privilege']['domain'] != domain:
                 updates['domain'] = domain
-                update = True
+                is_update = True
 
         if type in ['repository-admin','repository-view']:
             if format is None or repository is None:
@@ -181,10 +181,10 @@ def present(name,
                 return ret
             if meta['privilege']['format'] != format:
                 updates['format'] = format
-                update = True
+                is_update = True
             if meta['privilege']['repository'] != repository:
                 updates['repository'] = repository
-                update = True
+                is_update = True
 
         if type == 'repository-content-selector':
             if format is None or repository is None or contentSelector is None:
@@ -192,13 +192,13 @@ def present(name,
                 return ret
             if meta['privilege']['format'] != format:
                 updates['format'] = format
-                update = True
+                is_update = True
             if meta['privilege']['repository'] != repository:
                 updates['repository'] = repository
-                update = True
+                is_update = True
             if meta['privilege']['contentSelector'] != contentSelector:
                 updates['contentSelector'] = contentSelector
-                update = True
+                is_update = True
 
         if type == 'scripts':
             if script is None:
@@ -206,7 +206,7 @@ def present(name,
                 return ret
             if meta['privilege']['scriptName'] != scriptName:
                 updates['scriptName'] = scriptName
-                update = True
+                is_update = True
 
         if type == 'wildcard':
             if pattern is None:
@@ -214,10 +214,10 @@ def present(name,
                 return ret
             if meta['privilege']['pattern'] != pattern:
                 updates['pattern'] = pattern
-                update = True
+                is_update = True
 
         if __opts__['test']:
-            if update:
+            if is_update:
                 ret['result'] = None
                 ret['comment'] = 'privilege {} will be updated.'.format(name)
                 ret['changes'] = updates
@@ -225,7 +225,7 @@ def present(name,
                 ret['comment'] = 'privilege {} is in desired state.'.format(name)
             return ret
         
-        if update:
+        if is_update:
             update_results = __salt__['nexus3_privileges.update'](name, actions,
                         contentSelector, description, domain, format, pattern, repository, scriptName)
 

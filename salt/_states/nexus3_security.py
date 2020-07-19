@@ -112,7 +112,7 @@ def realms(name,
         'comment': ''
     }
 
-    is_update = True
+    is_update = False
     # get value of realms
     meta = __salt__['nexus3_realms.list_active']()
 
@@ -121,16 +121,14 @@ def realms(name,
         ret['comment'] = meta['error']
         return ret
 
-    if meta['realms'] == realms:
-        is_update = False
-        ret['comment'] = 'Realms in desired state'
-
+    if meta['realms'] != realms:
+        is_update = True
+        ret['comment'] = 'realms in desired state'
 
     if __opts__['test']:
         ret['result'] = None
-
         if is_update:
-            ret['comment'] = 'Realms will be set to {}.'.format(realms)
+            ret['comment'] = 'realms will be set to {}.'.format(realms)
 
         return ret
 

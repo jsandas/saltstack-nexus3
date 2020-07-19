@@ -121,7 +121,7 @@ def present(name,
         ret['changes'] = create_results
 
     if exists:
-        update = False
+        is_update = False
         updates = {}
 
         if meta['role']['description'] != description:
