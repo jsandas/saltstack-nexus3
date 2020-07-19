@@ -42,7 +42,7 @@ def clear(name):
 
     if __opts__['test']:
         ret['result'] = None
-        ret['comment'] = 'Email configuration will be reset to defaults'
+        ret['comment'] = 'email configuration will be reset to defaults'
         return ret
 
     reset_results = __salt__['nexus3_email.reset']()
@@ -59,17 +59,17 @@ def clear(name):
 
 def configure(name,
             enabled,
+            fromAddress='nexus@example.org',
             host='localhost',
-            port=25,
-            use_truststore=False,
-            username='',
-            password='',
-            email_from='nexus@example.org',
-            subject_prefix='',
-            starttls_enabled=False,
-            starttls_required=False,
-            tls_connect=False,
-            tls_verify=False):
+            nexusTrustStoreEnabled=False,
+            password=None,
+            port=0,
+            sslOnConnectEnabled=False,
+            sslServerIdentityCheckEnabled=False,
+            startTlsEnabled=False,
+            startTlsRequired=False,
+            subjectPrefix=None,
+            username=''):
     '''
     name (str):
         state id name
@@ -80,46 +80,47 @@ def configure(name,
     enabled (bool):
         enable email support [True|False]
 
+    fromAddress (str):
+        mail from address (Default: nexus@example.org)
+
     host (string):
         smtp hostname (Default: localhost)
 
-    port (int):
-        smtp port (Default: 25)
-
-    use_truststore (bool):
+    nexusTrustStoreEnabled (bool):
         use nexus truststore [True|False] (Default: False)
         .. note::
             Ensure CA certificate is add to the Nexus trustore
 
-    username (str):
-        smtp username (Default: '')
-
     password (str):
-        smtp password (Default: '')
+        smtp password (Default: None)
+       
+    port (int):
+        smtp port (Default: 0)
 
-    email_from (str):
-        mail from address (Default: nexus@example.org)
-
-    subject_prefix (str):
-        prefix for subject in emails (Default: '')
-
-    starttls_enabled (bool):
-        enable starttls (Default: False)
-        .. note::
-            tls_connect and starttls should be mutually exclusive
-
-    starttls_required (bool):
-        require starttls (Default: False)
-        .. note::
-            tls_connect and starttls should be mutually exclusive
-
-    tls_connect (bool):
+    sslOnConnectEnabled (bool):
         connect using tls (SMTPS) (Default: False)
         .. note::
-            tls_connect and starttls should be mutually exclusive
+            sslOnConnectEnabled and startTlsEnabled/startTlsRequired should be mutually exclusive
 
-    tls_verify (bool):
+    sslServerIdentityCheckEnabled (bool):
         verify server certificate (Default: False)
+
+    startTlsEnabled (bool):
+        enable starttls (Default: False)
+        .. note::
+            sslOnConnectEnabled and startTlsEnabled/startTlsRequired should be mutually exclusive
+
+    startTlsRequired (bool):
+        require starttls (Default: False)
+        .. note::
+            sslOnConnectEnabled and startTlsEnabled/startTlsRequired should be mutually exclusive
+
+
+    subjectPrefix (str):
+        prefix for subject in emails (Default: None)
+
+    username (str):
+        smtp username (Default: '')
 
     .. code-block:: yaml
 
@@ -128,8 +129,8 @@ def configure(name,
             - enabled: True
             - host: smtp@example.com
             - port: 587
-            - email_from: test@example.com
-            - starttls_enabled: True
+            - fromAddress: test@example.com
+            - startTlsEnabled: True
     '''
 
     ret = {
@@ -139,36 +140,38 @@ def configure(name,
         'comment': ''
     }
 
-    # this is used only for the output when test=True
-    email = {
-        'enabled': enabled,
-        'fromAddress': email_from,
-        'host': host,
-        'nexusTrustStoreEnabled': use_truststore,
-        'password': password,
-        'port': port,
-        'sslOnConnectEnabled': tls_connect,
-        'sslServerIdentityCheckEnabled': tls_verify,
-        'startTlsEnabled': starttls_enabled,
-        'startTlsRequired': starttls_required,
-        'subjectPrefix': subject_prefix,
-        'username': username
-    }
+    ret['comment'] = 'email configuration is in desired state.'
+    is_update = False
+    meta = __salt__['nexus3_email.describe']()
+    updates = {}
 
-    if __opts__['test']:
-        ret['result'] = None
-        ret['comment'] = 'Email configuration will change to {}.'.format(email)
+    if 'error' in meta.keys():
+        ret['result'] = False
+        ret['comment'] = meta['error']
         return ret
 
-    configure_results = __salt__['nexus3_email.configure'](enabled,host,port,
-                            use_truststore,username,password,email_from,subject_prefix,
-                            starttls_enabled,starttls_required,tls_connect,tls_verify)
+    input_vars = locals()
+    for k, v in meta['email'].items():
+        if v != input_vars[k]:
+            is_update = True
+            updates[k] = input_vars[k]
 
-    if 'error' in configure_results.keys():
-        ret['result'] = False
-        ret['comment'] = configure_results['error']
-        return ret        
+    if is_update:
+        if __opts__['test']:
+            ret['result'] = None
+            ret['comment'] = 'email configuration will be updated with: {}'.format(updates)
+            return ret
 
-    ret['changes'] = configure_results
+        configure_results = __salt__['nexus3_email.configure'](enabled,fromAddress,host,
+                        nexusTrustStoreEnabled,password,port,sslOnConnectEnabled,
+                        sslServerIdentityCheckEnabled,startTlsEnabled,startTlsRequired,
+                        subjectPrefix,username)
+
+        if 'error' in configure_results.keys():
+            ret['result'] = False
+            ret['comment'] = configure_results['error']
+            return ret        
+
+        ret['changes'] = configure_results
 
     return ret

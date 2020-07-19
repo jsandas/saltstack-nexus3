@@ -20,70 +20,70 @@ import nexus3
 log = logging.getLogger(__name__)
 
 __outputter__ = {
-    "sls": "highstate",
-    "apply_": "highstate",
-    "highstate": "highstate",
+    'sls': 'highstate',
+    'apply_': 'highstate',
+    'highstate': 'highstate',
 }
 
 email_path = 'beta/email'
 
 
 def configure(enabled,
+            fromAddress='nexus@example.org',
             host='localhost',
-            port=25,
-            use_truststore=False,
-            username='',
-            password='',
-            email_from='nexus@example.org',
-            subject_prefix='',
-            starttls_enabled=False,
-            starttls_required=False,
-            tls_connect=False,
-            tls_verify=False):
+            nexusTrustStoreEnabled=False,
+            password=None,
+            port=0,
+            sslOnConnectEnabled=False,
+            sslServerIdentityCheckEnabled=False,
+            startTlsEnabled=False,
+            startTlsRequired=False,
+            subjectPrefix=None,
+            username=''):
     '''
     enabled (bool):
         enable email support [True|False]
 
+    fromAddress (str):
+        mail from address (Default: nexus@example.org)
+
     host (string):
         smtp hostname (Default: localhost)
 
-    port (int):
-        smtp port (Default: 25)
-
-    use_truststore (bool):
+    nexusTrustStoreEnabled (bool):
         use nexus truststore [True|False] (Default: False)
         .. note::
             Ensure CA certificate is add to the Nexus trustore
 
-    username (str):
-        smtp username (Default: '')
-
     password (str):
-        smtp password (Default: '')
+        smtp password (Default: None)
+       
+    port (int):
+        smtp port (Default: 0)
 
-    email_from (str):
-        mail from address (Default: nexus@example.org)
-
-    subject_prefix (str):
-        prefix for subject in emails (Default: '')
-
-    starttls_enabled (bool):
-        enable starttls (Default: False)
-        .. note::
-            tls_connect and starttls should be mutually exclusive
-
-    starttls_required (bool):
-        require starttls (Default: False)
-        .. note::
-            tls_connect and starttls should be mutually exclusive
-
-    tls_connect (bool):
+    sslOnConnectEnabled (bool):
         connect using tls (SMTPS) (Default: False)
         .. note::
             tls_connect and starttls should be mutually exclusive
 
-    tls_verify (bool):
+    sslServerIdentityCheckEnabled (bool):
         verify server certificate (Default: False)
+
+    startTlsEnabled (bool):
+        enable starttls (Default: False)
+        .. note::
+            tls_connect and starttls should be mutually exclusive
+
+    startTlsRequired (bool):
+        require starttls (Default: False)
+        .. note::
+            tls_connect and starttls should be mutually exclusive
+
+    subjectPrefix (str):
+        prefix for subject in emails (Default: None)
+
+    username (str):
+        smtp username (Default: '')
 
     CLI Example:
 
@@ -99,44 +99,44 @@ def configure(enabled,
     }
 
     payload = {
-        "enabled": enabled,
-        "host": host,
-        "port": port,
-        "username": username,
-        "password": password,
-        "fromAddress": email_from,
-        "subjectPrefix": subject_prefix,
-        "startTlsEnabled": starttls_enabled,
-        "startTlsRequired": starttls_required,
-        "sslOnConnectEnabled": tls_connect,
-        "sslServerIdentityCheckEnabled": tls_verify,
-        "nexusTrustStoreEnabled": use_truststore
+        'enabled': enabled,
+        'host': host,
+        'port': port,
+        'username': username,
+        'password': password,
+        'fromAddress': fromAddress,
+        'subjectPrefix': subjectPrefix,
+        'startTlsEnabled': startTlsEnabled,
+        'startTlsRequired': startTlsRequired,
+        'sslOnConnectEnabled': sslOnConnectEnabled,
+        'sslServerIdentityCheckEnabled': sslServerIdentityCheckEnabled,
+        'nexusTrustStoreEnabled': nexusTrustStoreEnabled
         }
 
     nc = nexus3.NexusClient()
     resp = nc.put(email_path, payload)
 
     if resp['status'] != 204:
-        ret['comment'] = 'Failed to retrieve emails settings.'
+        ret['comment'] = 'could not to configure emails settings.'
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
         }
         return ret
     
-    email_config = get()
+    email_config = describe()
     ret['email'] = email_config['email']
 
     return ret
 
 
-def get():
+def describe():
     '''
     CLI Example:
 
     .. code-block:: bash
 
-        salt myminion nexus3_email.get
+        salt myminion nexus3_email.describe
     '''
 
     ret = {
@@ -149,7 +149,7 @@ def get():
     if resp['status'] == 200:
         ret['email'] = json.loads(resp['body'])
     else:
-        ret['comment'] = 'Failed to retrieve email settings'
+        ret['comment'] = 'could not to retrieve email settings'
         ret['error'] = 'code:{} msg:{}'.format(resp['status'], resp['body'])
 
     return ret
@@ -170,9 +170,9 @@ def reset():
     resp = nc.delete(email_path)
 
     if resp['status'] == 204:
-        ret['comment'] = 'Email settings reset'
+        ret['comment'] = 'email settings reset'
     else:
-        ret['comment'] = 'Failed to reset email settings'
+        ret['comment'] = 'could not reset email settings'
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
@@ -202,12 +202,12 @@ def verify(to):
     if resp['status'] == 200:
         status = json.loads(resp['body'])
         if status['success']:
-            ret['comment'] = 'Success sending email to {}.'.format(to)
+            ret['comment'] = 'email sent to {}.'.format(to)
         else:
-            ret['comment'] = 'Failed to send email.'
+            ret['comment'] = 'could not send email.'
             ret['error'] = status['reason']
     else:
-        ret['comment'] = 'Failed to send email.'
+        ret['comment'] = 'could not send email.'
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
