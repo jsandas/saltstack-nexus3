@@ -141,78 +141,61 @@ def present(name,
     if not meta['blobstore']:
         exists = False
 
-    # if test is true
-    if __opts__['test']:
-        ret['result'] = None
-        
-        if exists:
-            update = False
-            ret['comment'] = 'blobstore {} is in desired state'.format(name)
+    if not exists:
 
-            if quota_type is None and meta['blobstore']['softQuota'] is not None:
-                meta['blobstore']['softQuota'] = quota_type
-                ret['comment'] = 'softQuota will be changed to: {}'.format(meta['blobstore']['softQuota'])
-
-            if quota_type is not None and meta['blobstore']['softQuota'] is not None:
-                if quota_type != meta['blobstore']['softQuota']['type']:
-                    update = True
-                    meta['blobstore']['softQuota']['type'] = quota_type
-                if quota_limit != meta['blobstore']['softQuota']['limit']:
-                    update = True
-                    meta['blobstore']['softQuota']['limit'] = quota_limit
-                
-                if update:
-                    ret['comment'] = 'softQuota will be updated to: {}'.format(meta['blobstore']['softQuota'])
-        
-            if quota_type is not None and meta['blobstore']['softQuota'] is None:
-                meta['blobstore']['softQuota'] = {}
-                meta['blobstore']['softQuota']['type'] = quota_type
-                meta['blobstore']['softQuota']['limit'] = quota_limit
-                ret['comment'] = 'softQuota will be changed to: {}'.format(meta['blobstore']['softQuota'])
-
+        if __opts__['test']:
+            ret['result'] = None
+            ret['comment'] = 'blobstore {} will be created.'.format(name)
             return ret
 
-        ret['comment'] = 'blobstore {} will be created: store_type: {} quota_type: {} quota_limit: {}'.format(name, store_type, quota_type, quota_limit)
 
-        if quota_type is None:
-            ret['comment'] = 'blobstore {} will be created: store_type: {}'.format(name, store_type)  
-      
-        return ret
+        create_results = __salt__['nexus3_blobstores.create'](name, quota_type, quota_limit, store_type)
+        if 'error' in create_results.keys():
+            ret['result'] = False
+            ret['comment'] = create_results['error']
+            return ret
+
+        ret['changes'] = create_results  
   
     if exists:
-        update = False
+        is_update = False
+        updates = {}
+
         ret['comment'] = 'blobstore {} is in desired state'.format(name)
 
         if quota_type is None and meta['blobstore']['softQuota'] is not None:
-            update = True
+            updates['quota_type'] = quota_type
+            is_update = True
 
         if quota_type is not None and meta['blobstore']['softQuota'] is not None:
             if quota_type != meta['blobstore']['softQuota']['type']:
-                update = True
+                updates['quota_type'] = quota_type
+                is_update = True
             if quota_limit != meta['blobstore']['softQuota']['limit']:
-                update = True
+                updates['quota_limit'] = quota_limit
+                is_update = True
 
         if quota_type is not None and meta['blobstore']['softQuota'] is None:
-            update = True
-            
-        if update:
+            updates['quota_type'] = quota_type
+            updates['quota_limit'] = quota_limit
+            is_update = True
+
+        if __opts__['test']:
+            if is_update:
+                ret['result'] = None
+                ret['comment'] = 'blobstore {} will be updated with: {}'.format(name, updates)
+            else:
+                ret['comment'] = 'blobstore {} is in desired state.'.format(name)
+            return ret
+
+        if is_update:
             update_results = __salt__['nexus3_blobstores.update'](name, quota_type, quota_limit)
             if 'error' in update_results.keys():
                 ret['result'] = False
                 ret['comment'] = update_results['error']
                 return ret
 
-            ret['changes'] = update_results
+            ret['changes'] = updates
             ret['comment'] = ''
-
-        return ret        
-
-    create_results = __salt__['nexus3_blobstores.create'](name, quota_type, quota_limit, store_type)
-    if 'error' in create_results.keys():
-        ret['result'] = False
-        ret['comment'] = create_results['error']
-        return ret
-
-    ret['changes'] = create_results  
 
     return ret

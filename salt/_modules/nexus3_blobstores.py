@@ -101,7 +101,7 @@ def create(name,
     resp = nc.get(path + '/' + name)
 
     if resp['status'] == 200:
-        ret['comment'] = 'Blobstore "{}" already exists.'.format(name)
+        ret['comment'] = 'blobstore {} already exists.'.format(name)
         return ret
 
     resp = nc.post(path, payload)
@@ -109,7 +109,7 @@ def create(name,
     if resp['status'] == 204:
         ret['blobstore'] = describe(name)['blobstore']
     else:
-        ret['comment'] = 'Failed to create blobstore "{}".'.format(name)
+        ret['comment'] = 'could not create blobstore {}.'.format(name)
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
@@ -141,9 +141,9 @@ def delete(name):
     resp = nc.delete(path)
 
     if resp['status'] == 404:
-        ret['comment'] = 'Blobstore "{}" does not exist.'.format(name)
+        ret['comment'] = 'blobstore {} does not exist.'.format(name)
     elif resp['status'] !=204 :
-        ret['comment'] = 'Failed to delete blobstore "{}".'.format(name)
+        ret['comment'] = 'could not delete blobstore {}.'.format(name)
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
@@ -172,7 +172,7 @@ def describe(name):
 
     if 'error' in resp.keys():
         ret['result'] = False
-        ret['comment'] = 'Failed to retrieve blobstore "{}".'.format(name)
+        ret['comment'] = 'could not retrieve blobstore {}.'.format(name)
         ret['error'] = resp['error']
         return ret        
 
@@ -203,7 +203,7 @@ def list_all():
     if resp['status'] == 200:
         ret['blobstores'] = json.loads(resp['body'])
     else:
-        ret['comment'] = 'Failed to retrieve blobstores "{}".'
+        ret['comment'] = 'could not retrieve blobstores.'
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
@@ -268,7 +268,7 @@ def update(name,
     if resp['status'] == 204:
         ret['blobstore'] = describe(name)['blobstore']
     else:
-        ret['comment'] = 'Failed to update blobstore "{}".'.format(name)
+        ret['comment'] = 'could not update blobstore {}.'.format(name)
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
