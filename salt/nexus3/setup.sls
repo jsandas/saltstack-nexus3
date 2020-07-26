@@ -1,61 +1,110 @@
 {% from tpldir + "/map.jinja" import nexus with context %}
 
-burgers_create:
-  nexus3_blobstores.present:
-    - name: burgers
+# burgers_create:
+#   nexus3_blobstores.present:
+#     - name: burgers
 
-burgers_update:
-  nexus3_blobstores.present:
-    - name: burgers
-    - quota_type: spaceRemainingQuota
-    - quota_limit: 5000000
+# burgers_update:
+#   nexus3_blobstores.present:
+#     - name: burgers
+#     - quota_type: spaceRemainingQuota
+#     - quota_limit: 5000000
 
-burgers_delete:
-  nexus3_blobstores.absent:
-    - name: burgers
+# burgers_delete:
+#   nexus3_blobstores.absent:
+#     - name: burgers
 
-# should not exist
-delete_test_blobstore:
-  nexus3_blobstores.absent:
-    - name: test
+# # should not exist
+# delete_test_blobstore:
+#   nexus3_blobstores.absent:
+#     - name: test
 
-setup_email:
-  nexus3_email.configure:
-    - enabled: True
-    - host: smtp.example.com
-    - port: 587
-    - email_from: test@example.com
-    - starttls_enabled: True
 
-clear_email:
-  nexus3_email.clear
+
+# clear_email:
+#   nexus3_email.clear
   
-yum-proxy:
-  nexus3_repositories.present:
-    - repo_format: yum
-    - repo_type: proxy
-    - remote_url: http://mirror.centos.org/centos/7/os/x86_64/
-    - content_max_age: 3600
+# yum-proxy:
+#   nexus3_repositories.present:
+#     - repo_format: yum
+#     - repo_type: proxy
+#     - remote_url: http://mirror.centos.org/centos/7/os/x86_64/
+#     - content_max_age: 3600
 
-create-yum-hosted:
-  nexus3_repositories.present:
-    - name: yum-hosted
-    - repo_format: yum
-    - repo_type: hosted
-    - yum_repodata_depth: 0
-    - yum_deploy_policy:  permissive
-    - strict_content_validation: True
+# create-yum-hosted:
+#   nexus3_repositories.present:
+#     - name: yum-hosted
+#     - repo_format: yum
+#     - repo_type: hosted
+#     - yum_repodata_depth: 0
+#     - yum_deploy_policy:  permissive
+#     - strict_content_validation: True
 
-delete-yum-hosted:
-  nexus3_repositories.absent:
-    - name: yum-hosted
+# delete-yum-hosted:
+#   nexus3_repositories.absent:
+#     - name: yum-hosted
 
-nonexistent-repo:
-  nexus3_repositories.absent
+# nonexistent-repo:
+#   nexus3_repositories.absent
 
-set_anonymous_access_false:
-  nexus3_security.anonymous_access:
-    - enabled: False
+# set_anonymous_access_false:
+#   nexus3_security.anonymous_access:
+#     - enabled: False
+
+# create_privilege:
+#   nexus3_privileges.present:
+#     - name: testing1
+#     - actions: ['ALL']
+#     - description: 'Test repo admin'
+#     - format: maven2
+#     - repository: '*'
+#     - privilege_type: repository-admin
+
+# delete_privilege:
+#   nexus3_privileges.absent:
+#     - name: testing1
+
+# create_role:
+#   nexus3_roles.present:
+#     - name: testing1
+#     - description: 'test role'
+#     - privileges: ['nx-repository-view-*-*-read']
+#     - roles: ['nx-anonymous']
+
+# update_role:
+#   nexus3_roles.present:
+#     - name: testing1
+#     - description: 'test role update'
+#     - privileges: ['nx-repository-view-*-*-read']
+#     - roles: ['nx-anonymous']
+
+# create_user1:
+#   nexus3_users.present:
+#     - name: test_user1 
+#     - password: abc123
+#     - emailAddress: test@email.com
+#     - firstName: Test1
+#     - lastName: User
+#     - roles: ['nx-admin']
+
+# create_user2:
+#   nexus3_users.present:
+#     - name: test_user2
+#     - password: abc123
+#     - emailAddress: test@email.com
+#     - firstName: Test2
+#     - lastName: User
+#     - roles: ['testing1']
+
+# # states based on pillar data
+# {% for blobstore, data in nexus['blobstores'].items() %}
+# create_blobstore_{{ blobstore }}:
+#   nexus3_blobstores.present:
+#     - name: {{ blobstore }}
+#   {% for item in data %}
+#     - {{ item }}
+#   {% endfor %}
+# {% endfor %}
 
 set_anonymous_access_true:
   nexus3_security.anonymous_access:
@@ -68,60 +117,13 @@ update_realms:
       - NexusAuthorizingRealm
       - DockerToken
 
-create_privilege:
-  nexus3_privileges.present:
-    - name: testing1
-    - actions: ['ALL']
-    - description: 'Test repo admin'
-    - format: maven2
-    - repository: '*'
-    - privilege_type: repository-admin
-
-delete_privilege:
-  nexus3_privileges.absent:
-    - name: testing1
-
-create_role:
-  nexus3_roles.present:
-    - name: testing1
-    - description: 'test role'
-    - privileges: ['nx-repository-view-*-*-read']
-    - roles: ['nx-anonymous']
-
-update_role:
-  nexus3_roles.present:
-    - name: testing1
-    - description: 'test role update'
-    - privileges: ['nx-repository-view-*-*-read']
-    - roles: ['nx-anonymous']
-
-create_user1:
-  nexus3_users.present:
-    - name: test_user1 
-    - password: abc123
-    - emailAddress: test@email.com
-    - firstName: Test1
-    - lastName: User
-    - roles: ['nx-admin']
-
-create_user2:
-  nexus3_users.present:
-    - name: test_user2
-    - password: abc123
-    - emailAddress: test@email.com
-    - firstName: Test2
-    - lastName: User
-    - roles: ['testing1']
-
-# states based on pillar data
-{% for blobstore, data in nexus['blobstores'].items() %}
-create_blobstore_{{ blobstore }}:
-  nexus3_blobstores.present:
-    - name: {{ blobstore }}
-  {% for item in data %}
-    - {{ item }}
-  {% endfor %}
-{% endfor %}
+setup_email:
+  nexus3_email.configure:
+    - enabled: True
+    - host: smtp.example.com
+    - port: 587
+    - fromAddress: test@example.com
+    - startTlsEnabled: True
 
 {% for privilege, data in nexus['privileges'].items() %}
 create_privilege_{{ privilege }}:
@@ -132,14 +134,14 @@ create_privilege_{{ privilege }}:
   {% endfor %}
 {% endfor %}
 
-{% for repository, data in nexus['repositories'].items() %}
-repositories_{{ repository }}:
-  nexus3_repositories.present:
-    - name: {{ repository }}
-  {% for item in data %}
-    - {{ item }}
-  {% endfor %}
-{% endfor %}
+# {% for repository, data in nexus['repositories'].items() %}
+# repositories_{{ repository }}:
+#   nexus3_repositories.present:
+#     - name: {{ repository }}
+#   {% for item in data %}
+#     - {{ item }}
+#   {% endfor %}
+# {% endfor %}
 
 {% for role, data in nexus['roles'].items() %}
 role_{{ role }}:

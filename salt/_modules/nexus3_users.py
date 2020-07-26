@@ -69,7 +69,7 @@ def create(name,
     '''
 
     ret = {
-        'users': {},
+        'user': {},
     }
 
     path = users_beta_path
@@ -89,9 +89,9 @@ def create(name,
     resp = nc.post(path, payload)
 
     if resp['status'] == 200:
-        ret['users'] = json.loads(resp['body'])
+        ret['user'] = json.loads(resp['body'])
     else:
-        ret['comment'] = 'Failed to create user.'
+        ret['comment'] = 'could not create user {}.'.format(name)
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
@@ -113,7 +113,7 @@ def describe(name):
     '''
 
     ret = {
-        'users': {},
+        'user': {},
     }
 
     path = users_beta_path
@@ -125,11 +125,11 @@ def describe(name):
         users = json.loads(resp['body'])
         for user in users:
             if user['userId'] == name:
-                ret['users'] = user
+                ret['user'] = user
             
         return ret
     else:
-        ret['comment'] = 'Failed to retrieve users.'
+        ret['comment'] = 'could not retrieve user {}.'.format(name)
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
@@ -159,7 +159,7 @@ def delete(name):
     if resp['status'] == 204:
         ret['comment'] = 'user {} deleted'.format(name)
     else:
-        ret['comment'] = 'Failed to delete user.'
+        ret['comment'] = 'could not delete user {}.'.format(name)
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
@@ -189,55 +189,7 @@ def list_all():
     if resp['status'] == 200:
         ret['users'] = json.loads(resp['body'])
     else:
-        ret['comment'] = 'Failed to retrieve users.'
-        ret['error'] = {
-            'code': resp['status'],
-            'msg': resp['body']
-        }
-
-    return ret
-
-
-def set_password(name,
-                    password):
-    '''
-    name (str):
-        name of user
-
-    password (str):
-        password
-
-    CLI Example:
-
-    .. code-block:: bash
-
-        salt myminion nexus3_users.set_password name=test_user password=testing123
-
-        .. note::
-            running this command via the command-line could result in the password being saved
-            is the user shell history
-    '''
-
-    ret = {
-        'users': {},
-    }
-
-    meta = describe(name)['users']
-
-    if not meta:
-        ret['comment'] = 'user {} does not exist'.format(name)
-        return ret
-
-    path = users_beta_path + '/' + name + '/change-password'
-
-    nc = nexus3.NexusClient()
-
-    resp = nc.put_str(path, password)
-
-    if resp['status'] == 204:
-        ret['comment'] = 'password set'
-    else:
-        ret['comment'] = 'Failed to set password.'
+        ret['comment'] = 'could not retrieve users.'
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
@@ -279,10 +231,10 @@ def update(name,
     '''
 
     ret = {
-        'users': {},
+        'user': {},
     }
 
-    meta = describe(name)['users']
+    meta = describe(name)['user']
 
     if not meta:
         ret['comment'] = 'user {} does not exist'.format(name)
@@ -310,9 +262,57 @@ def update(name,
     resp = nc.put(path, meta)
 
     if resp['status'] == 204:
-        ret['users'] = describe(name)['users']
+        ret['user'] = describe(name)['user']
     else:
-        ret['comment'] = 'Failed to update user.'
+        ret['comment'] = 'could not update user {}.'.format(name)
+        ret['error'] = {
+            'code': resp['status'],
+            'msg': resp['body']
+        }
+
+    return ret
+
+
+def update_password(name,
+                    password):
+    '''
+    name (str):
+        name of user
+
+    password (str):
+        password
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt myminion nexus3_users.update_password name=test_user password=testing123
+
+        .. note::
+            running this command via the command-line could result in the password being saved
+            is the user shell history
+    '''
+
+    ret = {
+        'user': {},
+    }
+
+    meta = describe(name)['user']
+
+    if not meta:
+        ret['comment'] = 'user {} does not exist'.format(name)
+        return ret
+
+    path = users_beta_path + '/' + name + '/change-password'
+
+    nc = nexus3.NexusClient()
+
+    resp = nc.put_str(path, password)
+
+    if resp['status'] == 204:
+        ret['comment'] = 'updated password for {}.'.format(name)
+    else:
+        ret['comment'] = 'could not update password for {}.'.format(name)
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']

@@ -79,6 +79,9 @@ def present(name,
 
     emailAddress (str):
         email address
+        .. note::
+            password will always be updated as there is not
+            a way to determine it's current value
 
     firstName (str):
         first name
@@ -126,7 +129,7 @@ def present(name,
     # get value of realms
     meta = __salt__['nexus3_users.describe'](name)
 
-    if meta['users'] == {}:
+    if meta['user'] == {}:
         exists = False
 
     if not exists:
@@ -146,19 +149,55 @@ def present(name,
         ret['changes'] = create_results
 
     if exists:
+        is_update = False
+        updates = {}
+
+        if meta['user']['emailAddress'] != emailAddress:
+            meta['user']['emailAddress'] = emailAddress
+            updates['emailAddress'] = emailAddress
+            is_update = True
+
+        if meta['user']['firstName'] != firstName:
+            meta['user']['firstName'] = firstName
+            updates['firstName'] = firstName
+            is_update = True
+
+        if meta['user']['lastName'] != lastName:
+            meta['user']['lastName'] = lastName
+            updates['lastName'] = lastName
+            is_update = True
+
+        if meta['user']['roles'] != roles:
+            meta['user']['roles'] = roles
+            updates['roles'] = roles
+            is_update = True
+
+        if meta['user']['status'] != status:
+            meta['user']['status'] = status
+            updates['status'] = status
+            is_update = True
+
         if __opts__['test']:
-            ret['result'] = None
-            ret['comment'] = 'role {} will be updated.'.format(name)
+            if is_update:
+                ret['result'] = None
+                ret['comment'] = 'user {} will be updated with: {}'.format(name, updates)
+            else:
+                ret['comment'] = 'user {} is in desired state.'.format(name)
             return ret
-        
-        update_results = __salt__['nexus3_users.update'](name,emailAddress,firstName,lastName,roles,status)
-        update_pw_results = __salt__['nexus3_users.set_password'](name,password)
 
-        if 'error' in update_results.keys() or 'error' in update_pw_results.keys():
-            ret['result'] = False
-            ret['comment'] = update_results['error'] or update_pw_results['error']
-            return ret        
+        # always update password because there isn't a way to 
+        # determine if it is set to the provided value
+        update_pw_results = __salt__['nexus3_users.update_password'](name,password)
+        if is_update:
+            update_results = __salt__['nexus3_users.update'](name,emailAddress,firstName,lastName,roles,status)
 
-        ret['changes'] = update_results
+            if 'error' in update_results.keys() or 'error' in update_pw_results.keys():
+                ret['result'] = False
+                ret['comment'] = update_results['error'] or update_pw_results['error']
+                return ret        
+
+            ret['changes'] = updates
+        else:
+            ret['comment'] = 'user {} is in desired state.'.format(name)
 
     return ret
