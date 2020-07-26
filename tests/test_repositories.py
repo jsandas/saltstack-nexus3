@@ -11,7 +11,7 @@ def test_list_all():
 
 
 def test_hosted():
-    ret = client.cmd('test.minion', 'nexus3_repositories.hosted', ['name=test-yum','repo_format=yum','yum_repodata_depth=3','yum_deploy_policy=permissive'])
+    ret = client.cmd('test.minion', 'nexus3_repositories.hosted', ['name=test-yum','format=yum','yum_repodata_depth=3','yum_deploy_policy=permissive'])
     print(ret)
     data = ret['test.minion']['repository']
     assert data['name'] == 'test-yum','wrong repo name'
@@ -20,7 +20,7 @@ def test_hosted():
 
 
 def test_group():
-    ret = client.cmd('test.minion', 'nexus3_repositories.group', ['name=test-yum-group','repo_format=yum','group_members=["test-yum"]'])
+    ret = client.cmd('test.minion', 'nexus3_repositories.group', ['name=test-yum-group','format=yum','group_members=["test-yum"]'])
     print(ret)
     data = ret['test.minion']['repository']
     assert data['name'] == 'test-yum-group','wrong repository name'
