@@ -61,12 +61,12 @@ def group(name,
     docker_http_port (int):
         HTTP port for docker api (Default: None)
         .. note::
-            Normally used if the server is behind a secure proxy
+            Used if the server is behind a secure proxy
 
     docker_https_port (int):
         HTTPS port for docker api (Default: None)
         .. note::
-            Normally used if the server is configured for https
+            Used if the server is configured for https
 
     docker_v1_enabled (bool):
         Enable v1 api support [True|False] (Default: False)
@@ -213,12 +213,12 @@ def hosted(name,
     docker_http_port (int):
         HTTP port for docker api (Default: None)
         .. note::
-            Normally used if the server is behind a secure proxy
+            Used if the server is behind a secure proxy
 
     docker_https_port (int):
         HTTPS port for docker api (Default: None)
         .. note::
-            Normally used if the server is configured for https
+            Used if the server is configured for https
 
     docker_v1_enabled (bool):
         Enable v1 api support [True|False] (Default: False)
@@ -262,7 +262,10 @@ def hosted(name,
             'blobStoreName': blobstore,
             'strictContentTypeValidation': strict_content_validation,
             'writePolicy': write_policy
-        },
+        }
+    }
+
+    cleanup = {
         'cleanup': {
             'policyNames': cleanup_policies
         }
@@ -298,6 +301,9 @@ def hosted(name,
         }
     }
 
+    if cleanup_policies:
+        payload.update(cleanup)
+        
     if format == 'apt':
         if apt_gpg_passphrase != '':
             apt['aptSigning']['passphrase'] = apt_gpg_passphrase
@@ -454,9 +460,6 @@ def proxy(name,
             'blobStoreName': blobstore,
             'strictContentTypeValidation': strict_content_validation
         },
-        'cleanup': {
-            'policyNames': cleanup_policies
-        },
         'proxy': {
             'remoteUrl': remote_url,
             'contentMaxAge': content_max_age,
@@ -485,6 +488,12 @@ def proxy(name,
             'type': 'username',
             'username': remote_username,
             'password': remote_password
+        }
+    }
+
+    cleanup = {
+        'cleanup': {
+            'policyNames': cleanup_policies
         }
     }
 
@@ -523,6 +532,9 @@ def proxy(name,
 
     if remote_username is not None:
         payload['httpClient'].update(auth)
+
+    if cleanup_policies:
+        payload.update(cleanup)
 
     if format == 'apt':
         payload.update(apt)
