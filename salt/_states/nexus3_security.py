@@ -44,7 +44,6 @@ def anonymous_access(name,
         'comment': ''
     }
 
-    ret['comment'] = 'anonymous_access is in desired state: {}'.format(enabled)
     is_update = False
     # get value of anonymous_access
     meta = __salt__['nexus3_anonymous_access.describe']()
@@ -61,7 +60,8 @@ def anonymous_access(name,
         if is_update:
             ret['result'] = None
             ret['comment'] = 'anonymous_access will be set to {}.'.format(enabled)
-
+        else:
+            ret['comment'] = 'anonymous_access is in desired state: {}'.format(enabled)
         return ret
 
     if is_update:
@@ -73,6 +73,8 @@ def anonymous_access(name,
             return ret        
 
         ret['changes'] = update_results
+    else:
+        ret['comment'] = 'anonymous_access is in desired state: {}'.format(enabled)
 
     return ret
 
@@ -110,7 +112,6 @@ def realms(name,
         'comment': ''
     }
 
-    ret['comment'] = 'realms are in desired state'
     is_update = False
     # get value of realms
     meta = __salt__['nexus3_realms.list_active']()
@@ -127,7 +128,8 @@ def realms(name,
         if is_update:
             ret['result'] = None
             ret['comment'] = 'realms will be set to {}.'.format(realms)
-
+        else:
+            ret['comment'] = 'realms are in desired state'
         return ret
 
     if is_update:
@@ -139,5 +141,7 @@ def realms(name,
             return ret        
 
         ret['changes'] = update_results
+    else:
+        ret['comment'] = 'realms are in desired state'
 
     return ret
