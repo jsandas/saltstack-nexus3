@@ -93,15 +93,14 @@ def present(name,
         strict_content_validation=True,
         write_policy='allow_once',
         yum_deploy_policy='STRICT',
-        yum_repodata_depth=0,
-        **kwargs):
+        yum_repodata_depth=0):
     '''
     name (str):
         name (str):
             name of respository
 
     repo_format (str):
-        Format of repository [apt|bower|cocoapads|conan|docker|etc.]
+        Format of repository [apt|bower|cocoapads|conan|docker|maven2|etc.]
         .. note::
             This can be any officaly supported repository format for Nexus
 
@@ -192,15 +191,6 @@ def present(name,
 
     yum_repodata_depth (int):
         Specifies the repository depth where repodata folder(s) are created (Default: 0)
-
-    kwargs (dict):
-        Any additional parameters for specific repository formats passed as a dictionary. 
-        Check the Nexus 3 API docs for more information on other formats.
-        .. example::
-            apt='{'distribution': 'bionic', 'flat': False}'
-        .. note::
-            The above example is for reference.  Apt is fully supported with arguments in this function.
-
     .. code-block:: yaml
 
         create_repository:
@@ -219,19 +209,29 @@ def present(name,
         'comment': ''
     }
 
-    metadata = __salt__['nexus3_repositories.describe'](name=name)
+    exists = True
+    meta = __salt__['nexus3_repositories.describe'](name=name)
+
+    if not meta['repository']:
+        exists = False
+
 
     if __opts__['test']:
         ret['result'] = None
         ret['comment'] = ''
 
-        if not metadata['repository']:            
-            ret['comment'] = 'Repository {} will be created. Type: {} Format: {}'.format(name, repo_type, repo_format)
+        if not meta['repository']:            
+            ret['comment'] = 'repository {} will be created. Type: {} Format: {}'.format(name, repo_type, repo_format)
         else:
-            ret['comment'] = 'Repository {} will be updated. Type: {} Format: {}'.format(name, repo_type, repo_format)
+            ret['comment'] = 'repository {} will be updated. Type: {} Format: {}'.format(name, repo_type, repo_format)
         return ret
 
     if repo_type == 'group':
+        if exists:
+            is_update = False
+            updates = {}
+
+
         resp = __salt__['nexus3_repositories.group'](name,
                                                 repo_format,
                                                 blobstore,

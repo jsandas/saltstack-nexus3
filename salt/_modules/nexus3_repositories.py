@@ -30,15 +30,14 @@ repo_v1_path = 'v1/repositories'
 
 
 def group(name,
-        repo_format,
+        format,
         blobstore='default',
         docker_force_auth=True,
         docker_http_port=None,
         docker_https_port=None,
         docker_v1_enabled=False,
         group_members=[],
-        strict_content_validation=True,
-        **kwargs):
+        strict_content_validation=True):
 
     '''
     Nexus 3 supports many different formats.  The bower, docker, maven, and nuget formats have built-in arguments.
@@ -48,7 +47,7 @@ def group(name,
     name (str):
         Name of repository
     
-    repo_format (str):
+    format (str):
         Format of repository [bower|cocoapads|conan|docker|etc.]
         .. note::
             This can be any officaly supported repository format for Nexus
@@ -79,21 +78,13 @@ def group(name,
 
     strict_content_validation (bool):
         Enable strict content type validation [True|False] (Default: True)
-
-    kwargs (dict):
-        Any additional parameters for specific repository formats passed as a dictionary. 
-        Check the Nexus 3 API docs for more information on other formats.
-        .. example::
-            yum='{'repodataDepth': 0, 'deployPolicy': 'STRICT'}
-        .. note::
-            The above example is for reference.  Yum repository groups do not have additional arguments.
   }
 
     CLI Example:
 
     .. code-block:: bash
 
-        salt myminion nexus3_repositories.group name=test-yum-group repo_format=yum group_members=['test-yum']
+        salt myminion nexus3_repositories.group name=test-yum-group format=yum group_members=['test-yum']
     '''
 
     ret = {
@@ -119,15 +110,12 @@ def group(name,
         }
     }
 
-    if repo_format == 'docker':
+    if format == 'docker':
         if docker_http_port is not None:
             docker['docker']['httpPort'] = docker_http_port
         if docker_https_port is not None:
             docker['docker']['httpsPort'] = docker_https_port
         payload.update(docker)
-
-    if kwargs:
-        payload.update(kwargs)
 
     metadata = describe(name)
 
@@ -137,9 +125,9 @@ def group(name,
 
     if not group_members:
         if update:
-            ret['comment'] = 'Failed to update repository {}.'.format(name)
+            ret['comment'] = 'could not update repository {}.'.format(name)
         else:
-            ret['comment'] = 'Failed to create repository {}.'.format(name)
+            ret['comment'] = 'could not create repository {}.'.format(name)
 
         ret['error'] = 'group_members cannot be empty'
         return ret
@@ -147,11 +135,11 @@ def group(name,
     nc = nexus3.NexusClient()
 
     if update:
-        update_path = repo_beta_path + '/' + repo_format + '/group/' + name
+        update_path = repo_beta_path + '/' + format + '/group/' + name
         resp = nc.put(update_path, payload)
         ret['comment'] = 'Updated repository {}.'.format(name)
     else:
-        create_path = repo_beta_path + '/' + repo_format + '/group'
+        create_path = repo_beta_path + '/' + format + '/group'
         resp = nc.post(create_path, payload)
         ret['comment'] = 'Created repository {}.'.format(name)
 
@@ -159,9 +147,9 @@ def group(name,
         ret['repository'] = describe(name)['repository']
     else:
         if update:
-            ret['comment'] = 'Failed to update repository {}.'.format(name)
+            ret['comment'] = 'could not update repository {}.'.format(name)
         else:
-            ret['comment'] = 'Failed to create repository {}.'.format(name)
+            ret['comment'] = 'could not create repository {}.'.format(name)
 
         ret['error'] = {
             'code': resp['status'],
@@ -172,7 +160,7 @@ def group(name,
 
 
 def hosted(name,
-        repo_format,
+        format,
         apt_dist_name='bionic',
         apt_gpg_passphrase='',
         apt_gpg_priv_key='',
@@ -187,8 +175,7 @@ def hosted(name,
         strict_content_validation=True,
         yum_deploy_policy='STRICT',
         yum_repodata_depth=0,
-        write_policy='allow_once',
-        **kwargs):
+        write_policy='allow_once'):
 
     '''
     Nexus 3 supports many different formats.  The apt, bower, docker, maven, and nuget formats have built-in arguments.
@@ -198,8 +185,8 @@ def hosted(name,
     name (str):
         Name of repository
     
-    repo_format (str):
-        Format of repository [apt|bower|cocoapads|conan|docker|etc.]
+    format (str):
+        Format of repository [apt|bower|cocoapads|conan|docker|maven2|etc.]
         .. note::
             This can be any officaly supported repository format for Nexus
 
@@ -253,23 +240,15 @@ def hosted(name,
 
     write_policy (str):
         Controls if deployments of and updates to artifacts are allowed [allow|allow_once|deny] (Default: allow_once)
-
-    kwargs (dict):
-        Any additional parameters for specific repository formats passed as a dictionary. 
-        Check the Nexus 3 API docs for more information on other formats.
-        .. example::
-            yum='{'repodataDepth': 0, 'deployPolicy': 'STRICT'}
-        .. note::
-            The above example is for reference.  Yum is fully supported with arguments in this function.
   }
 
     CLI Example:
 
     .. code-block:: bash
 
-        salt myminion nexus3.repositories.create_hosted name=test-raw repo_format=raw blobstore=raw_blobstore
+        salt myminion nexus3.repositories.create_hosted name=test-raw format=raw blobstore=raw_blobstore
 
-        salt myminion nexus3_repositories.create_hosted name=test-yum repo_format=yum yum_repodata_depth=3 yum_deploy_policy=permissive
+        salt myminion nexus3_repositories.create_hosted name=test-yum format=yum yum_repodata_depth=3 yum_deploy_policy=permissive
     '''
 
     ret = {
@@ -305,7 +284,7 @@ def hosted(name,
         }
     }
 
-    maven = {
+    maven2 = {
         'maven': {
             'versionPolicy': maven_version_policy.upper(),
             'layoutPolicy': maven_layout_policy.upper()
@@ -319,26 +298,23 @@ def hosted(name,
         }
     }
 
-    if repo_format == 'apt':
+    if format == 'apt':
         if apt_gpg_passphrase != '':
             apt['aptSigning']['passphrase'] = apt_gpg_passphrase
         payload.update(apt)
 
-    if repo_format == 'docker':
+    if format == 'docker':
         if docker_http_port is not None:
             docker['docker']['httpPort'] = docker_http_port
         if docker_https_port is not None:
             docker['docker']['httpsPort'] = docker_https_port
         payload.update(docker)
     
-    if repo_format == 'maven':
+    if format == 'maven2':
         payload.update(maven)
 
-    if repo_format == 'yum':
+    if format == 'yum':
         payload.update(yum)
-
-    if kwargs:
-        payload.update(kwargs)
 
     metadata = describe(name)
 
@@ -349,11 +325,11 @@ def hosted(name,
     nc = nexus3.NexusClient()
 
     if update:
-        update_path = repo_beta_path + '/' + repo_format + '/hosted/' + name
+        update_path = repo_beta_path + '/' + format + '/hosted/' + name
         resp = nc.put(update_path, payload)
         ret['comment'] = 'Updated repository {}.'.format(name)
     else:
-        create_path = repo_beta_path + '/' + repo_format + '/hosted'
+        create_path = repo_beta_path + '/' + format + '/hosted'
         resp = nc.post(create_path, payload)
         ret['comment'] = 'Created repository {}.'.format(name)
 
@@ -361,9 +337,9 @@ def hosted(name,
         ret['repository'] = describe(name)['repository']
     else:
         if update:
-            ret['comment'] = 'Failed to update repository {}.'.format(name)
+            ret['comment'] = 'could not update repository {}.'.format(name)
         else:
-            ret['comment'] = 'Failed to create repository {}.'.format(name)
+            ret['comment'] = 'could not create repository {}.'.format(name)
 
         ret['error'] = {
             'code': resp['status'],
@@ -374,7 +350,7 @@ def hosted(name,
 
 
 def proxy(name,
-        repo_format,
+        format,
         remote_url,
         apt_dist_name='bionic',
         apt_flat_repo=False,
@@ -390,8 +366,7 @@ def proxy(name,
         nuget_cache_max_age=3600,
         remote_password=None,
         remote_username=None,
-        strict_content_validation=True,
-        **kwargs):
+        strict_content_validation=True):
 
     '''
     Nexus 3 supports many different formats.  The apt, bower, docker, maven, and nuget formats have built-in arguments.
@@ -401,8 +376,8 @@ def proxy(name,
     name (str):
         Name of repository
     
-    repo_format (str):
-        Format of repository [apt|bower|cocoapads|conan|docker|etc.]
+    format (str):
+        Format of repository [apt|bower|cocoapads|conan|docker|maven2|etc.]
         .. note::
             This can be any officaly supported repository format for Nexus
 
@@ -458,21 +433,13 @@ def proxy(name,
     strict_content_validation (bool):
         Enable strict content type validation [True|False] (Default: True)
 
-    kwargs (dict):
-        Any additional parameters for specific repository formats passed as a dictionary. 
-        Check the Nexus 3 API docs for more information on other formats.
-        .. example::
-            apt='{'distribution': 'bionic', 'flat': False}'
-        .. note::
-            The above example is for reference.  Apt is fully supported with arguments in this function.
-
     CLI Example:
 
     .. code-block:: bash
 
-        salt myminion nexus3.repositories.proxy name=test_raw repo_format=raw blobstore=raw_blobstore
+        salt myminion nexus3.repositories.proxy name=test_raw format=raw blobstore=raw_blobstore
 
-        salt myminion nexus3_repositories.proxy name=test_apt repo_format=apt remote_url=http://test.example.com remote_username=bob remote_password=testing apt='{'distribution': 'bionic', 'flat':
+        salt myminion nexus3_repositories.proxy name=test_apt format=apt remote_url=http://test.example.com remote_username=bob remote_password=testing apt='{'distribution': 'bionic', 'flat':
  False}'
     '''
 
@@ -541,7 +508,7 @@ def proxy(name,
         }
     }
 
-    maven = {
+    maven2 = {
         'maven': {
             'versionPolicy': maven_version_policy.upper(),
             'layoutPolicy': maven_layout_policy.upper()
@@ -557,23 +524,20 @@ def proxy(name,
     if remote_username is not None:
         payload['httpClient'].update(auth)
 
-    if repo_format == 'apt':
+    if format == 'apt':
         payload.update(apt)
 
-    if repo_format == 'bower':
+    if format == 'bower':
         payload.update(bower)
 
-    if repo_format == 'docker':
+    if format == 'docker':
         payload.update(docker)
     
-    if repo_format == 'maven':
+    if format == 'maven2':
         payload.update(maven)
 
-    if repo_format == 'nuget':
+    if format == 'nuget':
         payload.update(nuget)
-
-    if kwargs:
-        payload.update(kwargs)
 
     metadata = describe(name)
 
@@ -584,11 +548,11 @@ def proxy(name,
     nc = nexus3.NexusClient()
 
     if update:
-        update_path = repo_beta_path + '/' + repo_format + '/proxy/' + name
+        update_path = repo_beta_path + '/' + format + '/proxy/' + name
         resp = nc.put(update_path, payload)
         ret['comment'] = 'Updated repository {}.'.format(name)
     else:
-        create_path = repo_beta_path + '/' + repo_format + '/proxy'
+        create_path = repo_beta_path + '/' + format + '/proxy'
         resp = nc.post(create_path, payload)
         ret['comment'] = 'Created repository {}.'.format(name)
 
@@ -596,9 +560,9 @@ def proxy(name,
         ret['repository'] = describe(name)['repository']
     else:
         if update:
-            ret['comment'] = 'Failed to update repository {}.'.format(name)
+            ret['comment'] = 'could not update repository {}.'.format(name)
         else:
-            ret['comment'] = 'Failed to create repository {}.'.format(name)
+            ret['comment'] = 'could not create repository {}.'.format(name)
 
         ret['error'] = {
             'code': resp['status'],
