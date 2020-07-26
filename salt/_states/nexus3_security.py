@@ -90,18 +90,22 @@ def realms(name,
     
     realms (list):
         list of realms in order they should be used 
+        .. note::
+            Include all desired realms in list as this will override
+            the current list
 
     .. code-block:: yaml
 
         update_realms:
           nexus3_security.realms:
-            - realms: ['NexusAuthenticatingRealm','NexusAuthorizingRealm','DockerToken']
+            - realms: ['NexusAuthenticatingRealm','NexusAuthorizingRealm','NpmToken','DockerToken']
 
         update_realms:
           nexus3_security.realms:
             - realms: 
               - NexusAuthenticatingRealm
               - NexusAuthorizingRealm
+              - NpmToken
               - DockerToken
     '''
 

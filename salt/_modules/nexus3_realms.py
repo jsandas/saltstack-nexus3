@@ -105,9 +105,12 @@ def reset():
 
     path = realms_beta_path + '/active'
 
+    # these are the defaults enabled
+    # upon first start of Nexus 3
     payload = [
         'NexusAuthenticatingRealm', 
-        'NexusAuthorizingRealm'
+        'NexusAuthorizingRealm',
+        'NpmToken'
     ]
 
     nc = nexus3.NexusClient()
@@ -131,12 +134,15 @@ def update(realms=[]):
     '''
     realms (list):
         list of realms in order they should be used 
+        .. note::
+            Include all desired realms in list as this will override
+            the current list
 
     CLI Example:
 
     .. code-block:: bash
 
-        salt myminion nexus3_realms.update realms="['NexusAuthenticatingRealm','NexusAuthorizingRealm','DockerToken']"
+        salt myminion nexus3_realms.update realms="['NexusAuthenticatingRealm','NexusAuthorizingRealm','NpmToken','DockerToken']"
     '''
 
     ret = {
