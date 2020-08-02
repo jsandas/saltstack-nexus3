@@ -34,4 +34,4 @@ salt \* nexus3_repositories.list_all
 ```
 
 Note: running start again after setting the new admin password will cause it to fail
-    to retrieve the temp admin password
+    to retrieve the temp admin password, but is not an issue

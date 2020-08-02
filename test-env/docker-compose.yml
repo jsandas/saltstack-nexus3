@@ -11,9 +11,8 @@ services:
       SALT_MASTER_CONFIG: '{"auto_accept": true}'
     volumes:
       - $PWD/../salt:/srv/salt
-      - $PWD/../pillar:/srv/pillar
-      # - $PWD/files/master.conf:/etc/salt/master.d/master.conf
-      # - $PWD/files/minion.conf:/etc/salt/minion.d/minion.conf
+      - $PWD/pillar:/srv/pillar
+      - $PWD/states/nexus3:/srv/salt/nexus3
       - $PWD/../tests/:/tests/
 
   salt-minion:
@@ -31,3 +30,5 @@ services:
     ports:
       - "8081:8081"
       - "5000:5000"
+    volumes:
+      - $PWD/files/nexus.properties:/nexus-data/etc/nexus.properties
