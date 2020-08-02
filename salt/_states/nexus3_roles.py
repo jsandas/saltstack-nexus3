@@ -40,7 +40,7 @@ def absent(name):
 
     meta = __salt__['nexus3_roles.describe'](name)
     
-    if not meta['roles']:
+    if not meta['role']:
         exists = False
 
     if exists:
@@ -52,7 +52,7 @@ def absent(name):
         resp = __salt__['nexus3_roles.delete'](name)
         if 'error' in resp.keys():
             ret['result'] = False
-            ret['comment'] = meta['error']
+            ret['comment'] = resp['error']
         else:
             ret['changes'] = resp
     else:

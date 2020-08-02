@@ -100,7 +100,7 @@ def delete(name):
 
     resp = nc.delete(path)
 
-    if resp['status'] == 200:
+    if resp['status'] == 204:
         ret['comment'] = 'role {} deleted'.format(name)
     else:
         ret['comment'] = 'could not delete role {}.'.format(name)
