@@ -218,14 +218,14 @@ def _script_processor(script_name, script_data, script_args, ret):
 base_url_data = """
 import groovy.json.JsonSlurper
 
-parsed_args = new JsonSlurper().parseText(args)
+parsedArgs = new JsonSlurper().parseText(args)
 
-core.baseUrl(parsed_args.base_url)
+core.baseUrl(parsedArgs.baseUrl)
 """
 
 def base_url(name):
     """
-    Enable or disable anonymous access to Nexus 3
+    Set base url for Nexus
 
     Args:
         name (str):
@@ -244,7 +244,7 @@ def base_url(name):
            'comment': 'base url set: {}'.format(name)
     }
 
-    script_args = {'base_url': name}
+    script_args = {'baseUrl': name}
 
     results = _script_processor(script_name, base_url_data, script_args, ret)
     return results
@@ -257,54 +257,54 @@ import org.sonatype.nexus.scheduling.TaskInfo
 import org.sonatype.nexus.scheduling.TaskScheduler
 import org.sonatype.nexus.scheduling.schedule.Schedule
 
-parsed_args = new JsonSlurper().parseText(args)
+parsedArgs = new JsonSlurper().parseText(args)
 
 TaskScheduler taskScheduler = container.lookup(TaskScheduler.class.getName())
 
 TaskInfo existingTask = taskScheduler.listsTasks().find { TaskInfo taskInfo ->
-    taskInfo.name == parsed_args.name
+    taskInfo.name == parsedArgs.name
 }
 
 if (existingTask && existingTask.getCurrentState().getRunState() != null) {
-    log.info("Could not update currently running task : " + parsed_args.name)
+    log.info("Could not update currently running task : " + parsedArgs.name)
     return
 }
 
-TaskConfiguration taskConfiguration = taskScheduler.createTaskConfigurationInstance(parsed_args.typeId)
+TaskConfiguration taskConfiguration = taskScheduler.createTaskConfigurationInstance(parsedArgs.typeId)
 if (existingTask) { taskConfiguration.setId(existingTask.getId()) }
-taskConfiguration.setName(parsed_args.name)
+taskConfiguration.setName(parsedArgs.name)
 
-parsed_args.taskProperties.each { key, value -> taskConfiguration.setString(key, value) }
+parsedArgs.taskProperties.each { key, value -> taskConfiguration.setString(key, value) }
 
-if (parsed_args.task_alert_email) {
-    taskConfiguration.setAlertEmail(parsed_args.task_alert_email)
+if (parsedArgs.setAlertEmail) {
+    taskConfiguration.setAlertEmail(parsedArgs.setAlertEmail)
 }
 
-parsed_args.booleanTaskProperties.each { key, value -> taskConfiguration.setBoolean(key, Boolean.valueOf(value)) }
+parsedArgs.booleanTaskProperties.each { key, value -> taskConfiguration.setBoolean(key, Boolean.valueOf(value)) }
 
-Schedule schedule = taskScheduler.scheduleFactory.cron(new Date(), parsed_args.cron)
+Schedule schedule = taskScheduler.scheduleFactory.cron(new Date(), parsedArgs.cron)
 
 taskScheduler.scheduleTask(taskConfiguration, schedule)
 """
 
 def task(name,
-         task_type_id,
-         task_properties,
-         task_cron,
-         task_alert_email=None):
+         typeId,
+         taskProperties,
+         cron,
+         setAlertEmail=None):
     """
     Args:
         name (str):
             Name of task
-        task_type_id (str):
+        typeId (str):
             Nexus taskId
             Options: db.backup, repository.docker.gc, repository.docker.upload-purge,
                      blobstore.compact, repository.purge-unused
-        task_properties (dict):
+        taskProperties (dict):
             Dictionary of the task properties
-        task_alert_email (str):
+        setAlertEmail (str):
             Email to send alerts to
-        task_cron (str):
+        cron (str):
             Options: '0 0 11 * 5 ?'
 
             Field Name	Allowed Values
@@ -327,10 +327,10 @@ def task(name,
            'comment': 'task created/updated: {}'.format(name)}
 
     script_args = {'name': name,
-                   'typeId': task_type_id,
-                   'taskProperties': task_properties,
-                   'task_alert_email': task_alert_email,
-                   'cron': task_cron}
+                   'typeId': typeId,
+                   'taskProperties': taskProperties,
+                   'setAlertEmail': setAlertEmail,
+                   'cron': cron}
 
     results = _script_processor(script_name, task_data, script_args, ret)
 
