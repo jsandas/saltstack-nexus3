@@ -49,7 +49,7 @@ def list_active():
     if resp['status'] == 200:
         ret['realms'] = json.loads(resp['body'])
     else:
-        ret['comment'] = 'Failed to retrieve active realms.'
+        ret['comment'] = 'could not retrieve active realms.'
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
@@ -79,7 +79,7 @@ def list_all():
     if resp['status'] == 200:
         ret['realms'] = json.loads(resp['body'])
     else:
-        ret['comment'] = 'Failed to retrieve available realms.'
+        ret['comment'] = 'could not retrieve available realms.'
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
@@ -119,9 +119,9 @@ def reset():
 
     if resp['status'] == 204:
         ret['realms'] = list_active()['realms']
-        ret['comment'] = 'Realms reset to defaults.'
+        ret['comment'] = 'realms reset to defaults.'
     else:
-        ret['comment'] = 'Failed to reset realms.'
+        ret['comment'] = 'could not reset realms.'
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
@@ -157,9 +157,9 @@ def update(realms=[]):
 
     if resp['status'] == 204:
         ret['realms'] = list_active()['realms']
-        ret['comment'] = 'Realms updated.'
+        ret['comment'] = 'realms updated.'
     else:
-        ret['comment'] = 'Failed to update realms.'
+        ret['comment'] = 'could not update realms.'
         ret['error'] = {
             'code': resp['status'],
             'msg': resp['body']
