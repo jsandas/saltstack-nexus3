@@ -137,11 +137,11 @@ def group(name,
     if update:
         update_path = repo_beta_path + '/' + format + '/group/' + name
         resp = nc.put(update_path, payload)
-        ret['comment'] = 'Updated repository {}.'.format(name)
+        ret['comment'] = 'updated repository {}.'.format(name)
     else:
         create_path = repo_beta_path + '/' + format + '/group'
         resp = nc.post(create_path, payload)
-        ret['comment'] = 'Created repository {}.'.format(name)
+        ret['comment'] = 'created repository {}.'.format(name)
 
     if resp['status'] == 201 or resp['status'] == 204:
         ret['repository'] = describe(name)['repository']
@@ -333,11 +333,11 @@ def hosted(name,
     if update:
         update_path = repo_beta_path + '/' + format + '/hosted/' + name
         resp = nc.put(update_path, payload)
-        ret['comment'] = 'Updated repository {}.'.format(name)
+        ret['comment'] = 'updated repository {}.'.format(name)
     else:
         create_path = repo_beta_path + '/' + format + '/hosted'
         resp = nc.post(create_path, payload)
-        ret['comment'] = 'Created repository {}.'.format(name)
+        ret['comment'] = 'created repository {}.'.format(name)
 
     if resp['status'] == 201 or resp['status'] == 204:
         ret['repository'] = describe(name)['repository']
@@ -562,11 +562,11 @@ def proxy(name,
     if update:
         update_path = repo_beta_path + '/' + format + '/proxy/' + name
         resp = nc.put(update_path, payload)
-        ret['comment'] = 'Updated repository {}.'.format(name)
+        ret['comment'] = 'updated repository {}.'.format(name)
     else:
         create_path = repo_beta_path + '/' + format + '/proxy'
         resp = nc.post(create_path, payload)
-        ret['comment'] = 'Created repository {}.'.format(name)
+        ret['comment'] = 'created repository {}.'.format(name)
 
     if resp['status'] == 201 or resp['status'] == 204:
         ret['repository'] = describe(name)['repository']

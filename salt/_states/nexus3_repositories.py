@@ -45,9 +45,9 @@ def absent(name):
         ret['comment'] = ''
 
         if not metadata['repository']:            
-            ret['comment'] = 'Repository {} not present.'.format(name)
+            ret['comment'] = 'repository {} not present.'.format(name)
         else:
-            ret['comment'] = 'Repository {} will be deleted.'.format(name)
+            ret['comment'] = 'repository {} will be deleted.'.format(name)
         return ret
 
     if not metadata['repository']:            
