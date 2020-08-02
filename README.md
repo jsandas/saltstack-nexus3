@@ -3,12 +3,14 @@ The purpose of this project is to create a (hopefully) easy to use method for ma
 This version is incomplete and is not ready for production use.  The goal is to get feature parity with v0.1 before adding any new functionality.
 
 Installation:
-Copy the _states, _modules folder the the files_root on the saltmaster (usually '/srv/salt').  Then run saltutil.sync_all to copy the files to the minion.
+Copy the _states, _modules, and _utils folder to the files_root of the saltmaster (usually '/srv/salt').  Then run saltutil.sync_all to copy the files to the minion.
 
     Example:
         salt '*' saltutil.sync_all
 
-The files in the nexus3 folder as well as the pillar data can be used as examples for using these modules.
+An alternative to copying these folders would be using gitfs specifying which branch/release to use.  Documentation here: (https://docs.saltstack.com/en/latest/topics/tutorials/gitfs.html).  Note, this has not been tested
+
+The files under the pillar and states folders under test-env can be used as examples for using these modules.
 
 The nexus3 state module depends on python requests library which should already be installed when the salt minion was installed.
 

@@ -12,8 +12,14 @@ docker_shell () {
 start () {
     docker-compose pull
     docker-compose up -d
-    
-    printf "\n Waiting for admin.password to be generated"
+
+    echo ""
+    echo "installing dependencies..."
+    # docker exec salt-master sh -c "apk --no-cache add py3-pygit2"
+    docker exec salt-master sh -c "apk --no-cache add git libgit2-dev && pip3 install pygit2"
+
+    echo ""
+    echo "Waiting for admin.password to be generated"
     _dur=0
     until docker exec nexus3 bash -c 'test -f /nexus-data/admin.password'
     do
@@ -31,7 +37,8 @@ start () {
     docker exec salt-master sh -c 'salt \* saltutil.sync_all' > /dev/null 2>&1
     docker-compose restart salt-minion
 
-    printf "\nadmin password: $(docker exec nexus3 bash -c 'cat /nexus-data/admin.password')\n"
+    echo ""
+    echo "admin password: $(docker exec nexus3 bash -c 'cat /nexus-data/admin.password')"
 }
 
 stop () {
