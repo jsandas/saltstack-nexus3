@@ -25,26 +25,6 @@ module itself.
           user: 'admin'
           pass: 'admin123'
 
-
-Set base url for Nexus
-
-.. code-block:: yaml
-
-    http://localhost:8081:
-      nexus3_script.base_url
-
-Create task for database backup
-Note: The key/values under task_properties is indented 4 spaces instead
-of two.  This is how salt creates a dictionary from the yaml
-
-.. code-block:: yaml
-
-    database_backup:
-      nexus3_script.tasks:
-        - task_type_id: 'db.backup'
-        - task_properties:
-            location:'/nexus-data/backup'
-        - task_cron: '0 0 21 * * ?'
 """
 # from __future__ import absolute_import, print_function, unicode_literals
 
@@ -227,13 +207,17 @@ def base_url(name):
     """
     Set base url for Nexus
 
-    Args:
-        name (str):
-            URL to set base_url to for Nexus 3
-            This would usually be the FQDN used
-            to access Nexus
-    Returns:
-        str: 'null' if successful
+    name (str):
+      URL to set base_url to for Nexus 3
+
+      .. note::
+        This would usually be the FQDN used
+        to access Nexus
+
+    .. code-block:: yaml
+
+      http://localhost:8081:
+      nexus3_scripts.base_url
     """
 
     script_name = 'setup_base_url'
@@ -293,20 +277,30 @@ def task(name,
          cron,
          setAlertEmail=None):
     """
-    Args:
-        name (str):
-            Name of task
-        typeId (str):
-            Nexus taskId
-            Options: db.backup, repository.docker.gc, repository.docker.upload-purge,
-                     blobstore.compact, repository.purge-unused
-        taskProperties (dict):
-            Dictionary of the task properties
-        setAlertEmail (str):
-            Email to send alerts to
-        cron (str):
-            Options: '0 0 11 * 5 ?'
 
+    name (str):
+        Name of task
+
+    typeId (str):
+        Nexus taskId [db.backup|repository.docker.gc|repository.docker.upload-purge|blobstore.compact|repository.purge-unused]
+
+    taskProperties (dict):
+        Dictionary of the task properties
+        .. note::
+            The key/values under task_properties is indented 4 spaces instead
+            of two.  This is how salt creates a dictionary from the yaml
+
+    setAlertEmail (str):
+        Email to send alerts to
+
+    cron (str):
+        Cron-like string to schedule task runs
+
+        .. example::
+            '0 0 11 * 5 ?'
+
+        .. note::
+            Cron schedule notes:
             Field Name	Allowed Values
             Seconds	    0-59
             Minutes	    0-59
@@ -317,6 +311,16 @@ def task(name,
             Year(optional)	empty, 1970-2099
     Returns:
         str: metadata about task if successful
+
+    .. code-block:: yaml
+
+      database_backup:
+        nexus3_scripts.tasks:
+          - task_type_id: 'db.backup'
+          - task_properties:
+              location:'/nexus-data/backup'
+          - task_cron: '0 0 21 * * ?'
+
     """
 
     script_name = 'create_task'
