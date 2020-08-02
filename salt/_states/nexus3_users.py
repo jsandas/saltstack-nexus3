@@ -40,7 +40,7 @@ def absent(name):
 
     meta = __salt__['nexus3_users.describe'](name)
     
-    if not meta['users']:
+    if not meta['user']:
         exists = False
 
     if exists:
