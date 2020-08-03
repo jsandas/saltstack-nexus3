@@ -8,11 +8,12 @@ services:
       - "4505:4505"
       - "4506:4506"
     environment: 
-      # SALT_MASTER_CONFIG: '{"auto_accept": true}'
-      SALT_MASTER_CONFIG: '{"auto_accept": true, "fileserver_backend": ["roots", "gitfs"], "gitfs_remotes": [{"https://github.com/jsandas/saltstack-nexus3.git":[{"name":"nexus3_modules_repo"},{"base":"v2.0"}]}]}'
+      SALT_MASTER_CONFIG: '{"auto_accept": true}'
+      # SALT_MASTER_CONFIG: '{"auto_accept": true, "fileserver_backend": ["roots", "gitfs"], "gitfs_remotes": [{"https://github.com/jsandas/saltstack-nexus3.git":[{"name":"nexus3_modules_repo"},{"base":"v2.0"}]}]}'
     volumes:
-      # - $PWD/../salt:/srv/salt
-      # - $PWD/pillar:/srv/pillar
+      - $PWD/../_modules:/srv/salt/_modules
+      - $PWD/../_states:/srv/salt/_states
+      - $PWD/../_utils:/srv/salt/_utils
       - $PWD/states/nexus3:/srv/salt/nexus3
       - $PWD/../tests/:/tests/
 

@@ -13,10 +13,10 @@ start () {
     docker-compose pull
     docker-compose up -d
 
-    echo ""
-    echo "installing dependencies..."
-    # docker exec salt-master sh -c "apk --no-cache add py3-pygit2"
-    docker exec salt-master sh -c "apk --no-cache add git libgit2-dev && pip3 install pygit2"
+    # dependencies required for gitfs testing
+    # echo ""
+    # echo "installing dependencies..."
+    # docker exec salt-master sh -c "apk --no-cache add git libgit2-dev && pip3 install pygit2"
 
     echo ""
     echo "Waiting for admin.password to be generated"

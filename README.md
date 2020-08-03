@@ -8,7 +8,7 @@ Copy the _states, _modules, and _utils folder to the files_root of the saltmaste
     Example:
         salt '*' saltutil.sync_all
 
-An alternative to copying these folders would be using gitfs specifying which branch/release to use.  Documentation here: (https://docs.saltstack.com/en/latest/topics/tutorials/gitfs.html).  Note, this has not been tested
+An alternative to copying these folders would be using gitfs specifying which branch/release to use.  Documentation here: (https://docs.saltstack.com/en/latest/topics/tutorials/gitfs.html).  Note: this has not been tested.
 
 The files under the pillar and states folders under test-env can be used as examples for using these modules.
 
