@@ -1,3 +1,8 @@
+**Deprecated** 
+
+This projects has been deprecated in regards to the nexus3 modules.  The new project can be found at https://github.com/jsandas/saltstack-nexus3-module
+
+
 State files for setting up Nexus 3 using docker and State module for working with the Nexus 3 API to configure Nexus.  This is a work in progress.
 
 Installation:
